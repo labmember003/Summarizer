@@ -10,23 +10,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.summarizer.DataManager.currentPage
 import com.example.summarizer.ui.theme.SummarizerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SummarizerTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
+            when (currentPage.value) {
+                PAGES.WALKTHROUGH -> {
+                    WalkThroughScreen()
                 }
+
+                else -> {}
             }
         }
     }
+}
+
+enum class PAGES {
+    LOGIN, USERS, WALKTHROUGH
 }
 
 @Composable
