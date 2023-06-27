@@ -33,6 +33,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.summarizer.DataManager.currentPage
 import com.google.accompanist.pager.HorizontalPagerIndicator
 
 val walkThroughPagerContent = listOf(
@@ -72,7 +73,7 @@ fun WalkThroughScreen() {
                 color = colorResource(id = R.color.custom_color_primary),
                 modifier = Modifier
                     .clickable {
-//                        TODO (HANDLE CLICK)
+                        currentPage.value = PAGES.LOGIN
                     }
             )
         }
@@ -100,7 +101,7 @@ fun WalkThroughScreen() {
                 .align(Alignment.CenterHorizontally)
                 .padding(56.dp),
             onClick = {
-//                        TODO (HANDLE CLICK)
+                currentPage.value = PAGES.LOGIN
             }) {
             Text(
                 text = "Get Started"
@@ -145,15 +146,4 @@ fun ScreenUI(pager: WalkThroughPager) {
         )
     }
 
-}
-
-@Composable
-fun LottieAnimation(animationID: Int) {
-    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(animationID))
-    LottieAnimation(
-        composition = composition,
-        iterations = LottieConstants.IterateForever,
-        modifier = Modifier
-            .size(400.dp)
-    )
 }

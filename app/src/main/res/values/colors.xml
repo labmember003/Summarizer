@@ -11,4 +11,6 @@
 
     <color name="custom_color_secondary">#FF8F00</color>
     <color name="custom_color_secondary_light">#FFD299</color>
+    <color name="purple_blue">#FF8692f7</color>
+    <color name="light_grey">#999999</color>
 </resources>
