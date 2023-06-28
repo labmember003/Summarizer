@@ -1,17 +1,24 @@
 package com.example.summarizer
 
-import android.content.Intent
-import androidx.activity.ComponentActivity
+import android.content.Context
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -22,17 +29,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat.startActivityForResult
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.text.PDFTextStripper
+import java.io.IOException
 
 @Preview(showBackground = true)
 @Composable
 fun MainScreen() {
     val bottomSheetOpen = remember{ mutableStateOf(false) }
+    val context = LocalContext.current
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -64,14 +75,30 @@ fun MainScreen() {
                 .padding(16.dp)
                 .weight(0.5F)
         )
+
+
+        val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+//            val item = result?.let { context.contentResolver.openInputStream(it) }
+//            val bytes = item?.readBytes()
+//            println(bytes)
+//            Log.i("sexxxx", bytes.toString())
+//            item?.close()
+            if (uri != null) {
+                val text = readPDFFile(uri, context)
+                Log.i("sexxxx", text)
+            }
+        }
+        BottomSheet(
+
+            isOpen = bottomSheetOpen.value,
+            onDismiss = { bottomSheetOpen.value = false },
+            onPdfOptionClicked = {
+                launcher.launch("application/pdf")
+            },
+            onImageOptionClicked = { /* Handle option 2 click */ }
+        )
     }
-    BottomSheet(
-        isOpen = bottomSheetOpen.value,
-        onDismiss = { bottomSheetOpen.value = false },
-        onOption1Clicked = { /* Handle option 1 click */ },
-        onOption2Clicked = { /* Handle option 2 click */ }
-//        onCancelButtonClicked = { bottomSheetOpen.value = false }
-    )
+
 }
 
 @Composable
@@ -105,42 +132,83 @@ fun UploadAnimation(open: MutableState<Boolean>) {
 fun BottomSheet(
     isOpen: Boolean,
     onDismiss: () -> Unit,
-    onOption1Clicked: () -> Unit,
-    onOption2Clicked: () -> Unit,
-//    onCancelButtonClicked: () -> Unit
+    onPdfOptionClicked: () -> Unit,
+    onImageOptionClicked: () -> Unit
 ) {
     if (isOpen) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .padding(16.dp)
+                .padding(16.dp, 24.dp, 16.dp, 16.dp)
+
         ) {
-            Text(
-                text = "Select an option",
-                style = MaterialTheme.typography.subtitle1,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            Button(
-                onClick = {
-                    onOption1Clicked()
-                    onDismiss()
-                },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .padding(bottom = 48.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Option 1")
+                Text(
+                    text = "Choose the file format:",
+                    style = MaterialTheme.typography.subtitle1,
+                )
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = "Close",
+                    modifier = Modifier
+                        .clickable {
+                            onDismiss()
+                        }
+                )
             }
-            Button(
-                onClick = {
-                    onOption2Clicked()
-                    onDismiss()
-                },
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(text = "Option 2")
+                Image(
+                    painter = painterResource(id = R.drawable.photo),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .clickable {
+                            onImageOptionClicked()
+                            onDismiss()
+                        }
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.pdffff),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .clickable {
+                            onPdfOptionClicked()
+                            onDismiss()
+                        }
+                )
             }
         }
     }
 }
+
+
+
+private fun readPDFFile(uri: Uri, context: Context): String {
+    val contentResolver = context.contentResolver
+    var convertedText: String = ""
+    try {
+        val inputStream = contentResolver.openInputStream(uri)
+        val document = PDDocument.load(inputStream)
+        val stripper = PDFTextStripper()
+
+        convertedText = stripper.getText(document)
+        // Do something with the extracted text (e.g., display it)
+
+        document.close()
+        inputStream?.close()
+    } catch (e: IOException) {
+        // Handle any exceptions that occur during reading the PDF
+        e.printStackTrace()
+    }
+    return convertedText
+}
+
+

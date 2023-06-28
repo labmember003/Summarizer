@@ -40,9 +40,16 @@ android {
         kotlinCompilerExtensionVersion '1.4.0'
     }
     packagingOptions {
+//        resources.excludes.add("META-INF/*")
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+
         }
+//        pickFirst 'lib/armeabi-v7a/libassmidi.so'
+        exclude('/Users/avi/.gradle/caches/modules-2/files-2.1/org.apache.pdfbox/fontbox/2.0.26/4e416198adde54b753e41d3312f799640dac5687/fontbox-2.0.26.jar')
+        exclude '**/fontbox-2.0.26.jar'
+        exclude '**/fontbox-2.0.26.jar'
+
     }
 }
 
@@ -56,6 +63,7 @@ dependencies {
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
+    implementation 'com.google.android.engage:engage-core:+'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -68,4 +76,8 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:0.30.1"
 
     implementation "com.airbnb.android:lottie-compose:6.0.0"
+    implementation('org.apache.pdfbox:pdfbox:2.0.26') {
+        exclude module: 'fontbox'
+    }
+
 }
