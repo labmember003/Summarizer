@@ -2,8 +2,13 @@ package com.example.summarizer
 
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -36,6 +41,10 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.TextRecognizer
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
@@ -44,6 +53,7 @@ import java.io.IOException
 @Preview(showBackground = true)
 @Composable
 fun MainScreen() {
+    val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     val bottomSheetOpen = remember{ mutableStateOf(false) }
     val context = LocalContext.current
     Column(
@@ -84,6 +94,14 @@ fun MainScreen() {
                 Log.i("hapyhapyhapy", text)
             }
         }
+        val launcher2 = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                val bitmap: Bitmap = uriToBitmap(context, it)
+                getTextFromImage(bitmap, recognizer, context)
+            }
+        }
+
+
         BottomSheet(
 
             isOpen = bottomSheetOpen.value,
@@ -91,10 +109,25 @@ fun MainScreen() {
             onPdfOptionClicked = {
                 launcher.launch("application/pdf")
             },
-            onImageOptionClicked = { /* Handle option 2 click */ }
+            onImageOptionClicked = {
+                launcher2.launch("image/*")
+            }
         )
     }
 
+}
+
+
+
+fun uriToBitmap(context: Context, uri: Uri): Bitmap {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        val source = ImageDecoder.createSource(context.contentResolver, uri)
+        ImageDecoder.decodeBitmap(source)
+    } else {
+        // For older versions, you can use the deprecated `MediaStore` API
+        val inputStream = context.contentResolver.openInputStream(uri)
+        BitmapFactory.decodeStream(inputStream)
+    }
 }
 
 @Composable
@@ -195,3 +228,25 @@ private fun extractTextFromPdf(uri: Uri, context: Context): String {
     }
     return text
 }
+
+private fun getTextFromImage(bitmap: Bitmap, recognizer: TextRecognizer, context: Context){
+    if (bitmap!=null) {
+        val image = bitmap?.let {
+            InputImage.fromBitmap(it, 0)
+        }
+        image?.let {
+            recognizer.process(it)
+                .addOnSuccessListener { visionText ->
+                    Log.i("kaaali billi", visionText.text)
+                    Toast.makeText(context, visionText.text, Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+
+                }
+        }
+    }
+    else{
+        Toast.makeText(context, "Please select photo", Toast.LENGTH_SHORT).show()
+    }
+}
+
