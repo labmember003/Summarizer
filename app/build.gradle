@@ -76,8 +76,6 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:0.30.1"
 
     implementation "com.airbnb.android:lottie-compose:6.0.0"
-    implementation('org.apache.pdfbox:pdfbox:2.0.26') {
-        exclude module: 'fontbox'
-    }
+    implementation 'com.tom-roush:pdfbox-android:2.0.27.0'
 
 }

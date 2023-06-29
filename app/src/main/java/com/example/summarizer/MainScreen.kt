@@ -1,5 +1,6 @@
 package com.example.summarizer
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -35,8 +36,9 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.text.PDFTextStripper
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.text.PDFTextStripper
 import java.io.IOException
 
 @Preview(showBackground = true)
@@ -75,17 +77,11 @@ fun MainScreen() {
                 .padding(16.dp)
                 .weight(0.5F)
         )
-
-
         val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
-//            val item = result?.let { context.contentResolver.openInputStream(it) }
-//            val bytes = item?.readBytes()
-//            println(bytes)
-//            Log.i("sexxxx", bytes.toString())
-//            item?.close()
             if (uri != null) {
-                val text = readPDFFile(uri, context)
-                Log.i("sexxxx", text)
+                val text = extractTextFromPdf(uri, context)
+                Log.i("hapyhapyhapy", "text")
+                Log.i("hapyhapyhapy", text)
             }
         }
         BottomSheet(
@@ -104,7 +100,6 @@ fun MainScreen() {
 @Composable
 fun UploadAnimation(open: MutableState<Boolean>) {
     val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.upload))
-    val context = LocalContext.current
     com.airbnb.lottie.compose.LottieAnimation(
         composition = composition,
         iterations = LottieConstants.IterateForever,
@@ -117,17 +112,6 @@ fun UploadAnimation(open: MutableState<Boolean>) {
 
 }
 
-
-//fun cat() {
-//    val intent = Intent()
-//    intent.action = Intent.ACTION_GET_CONTENT
-//    intent.type = "application/pdf"
-//    intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png", "image/jpg", "application/pdf"))
-//    val activity = context as? ComponentActivity
-//    if (activity != null) {
-//        startActivityForResult(activity, intent, 12, null)
-//    }
-//}
 @Composable
 fun BottomSheet(
     isOpen: Boolean,
@@ -189,26 +173,25 @@ fun BottomSheet(
     }
 }
 
-
-
-private fun readPDFFile(uri: Uri, context: Context): String {
+private fun extractTextFromPdf(uri: Uri, context: Context): String {
+    PDFBoxResourceLoader.init(context)
     val contentResolver = context.contentResolver
-    var convertedText: String = ""
+    var text = ""
     try {
-        val inputStream = contentResolver.openInputStream(uri)
-        val document = PDDocument.load(inputStream)
-        val stripper = PDFTextStripper()
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            val document = PDDocument.load(inputStream)
 
-        convertedText = stripper.getText(document)
-        // Do something with the extracted text (e.g., display it)
+            val stripper = PDFTextStripper()
+            text = stripper.getText(document)
 
-        document.close()
-        inputStream?.close()
+            // Do something with the extracted text
+            Log.d(TAG, "Extracted Text: $text")
+
+            document.close()
+
+        }
     } catch (e: IOException) {
-        // Handle any exceptions that occur during reading the PDF
         e.printStackTrace()
     }
-    return convertedText
+    return text
 }
-
-
