@@ -15,11 +15,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
@@ -32,9 +34,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -67,11 +73,39 @@ fun MainScreen() {
             modifier = Modifier
                 .weight(0.5f)
         ) {
-            Text(
-                text = "Upload Image Or E-Book",
+            Row(
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .padding(top = 16.dp)
-            )
+                    .fillMaxWidth(1f)
+            ) {
+                Text(
+                    text = "Upload Image Or E-Book",
+                    modifier = Modifier
+                )
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(colorResource(id = R.color.light_grey))
+                        .padding(8.dp)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.token),
+                        contentDescription = "Your Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clickable {
+                                DataManager.currentPage.value = PAGES.BUYTOKEN
+                            }
+                    )
+                    Text(
+                        text = "100",
+                    )
+                }
+            }
             UploadAnimation(bottomSheetOpen)
             LineWithText()
         }
@@ -230,23 +264,18 @@ private fun extractTextFromPdf(uri: Uri, context: Context): String {
 }
 
 private fun getTextFromImage(bitmap: Bitmap, recognizer: TextRecognizer, context: Context){
-    if (bitmap!=null) {
-        val image = bitmap?.let {
-            InputImage.fromBitmap(it, 0)
-        }
-        image?.let {
-            recognizer.process(it)
-                .addOnSuccessListener { visionText ->
-                    Log.i("kaaali billi", visionText.text)
-                    Toast.makeText(context, visionText.text, Toast.LENGTH_SHORT).show()
-                }
-                .addOnFailureListener { e ->
-
-                }
-        }
+    val image = bitmap.let {
+        InputImage.fromBitmap(it, 0)
     }
-    else{
-        Toast.makeText(context, "Please select photo", Toast.LENGTH_SHORT).show()
+    image.let {
+        recognizer.process(it)
+            .addOnSuccessListener { visionText ->
+                Log.i("kaaali billi", visionText.text)
+                Toast.makeText(context, visionText.text, Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+
+            }
     }
 }
 

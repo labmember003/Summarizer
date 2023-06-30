@@ -39,13 +39,16 @@ class MainActivity : ComponentActivity() {
                 PAGES.MAINPAGE -> {
                     MainScreen()
                 }
+                PAGES.BUYTOKEN -> {
+                    BuyTokenScreen()
+                }
             }
         }
     }
 }
 
 enum class PAGES {
-    LOGIN, WALKTHROUGH, MAINPAGE
+    LOGIN, WALKTHROUGH, MAINPAGE, BUYTOKEN
 }
 
 enum class SCREEN {
