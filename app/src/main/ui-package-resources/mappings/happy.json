@@ -1,0 +1,6 @@
+{
+    "target": "happy",
+    "package": "com.example.summarizer.happy",
+    "generateImplementation": true,
+    "generatePreviews": true
+}
