@@ -36,6 +36,7 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.SkuDetailsParams
 import com.example.summarizer.DataManager.USER_TOKEN
+import com.example.summarizer.DataManager.currentPage
 import com.falcon.summarizer.R
 
 class MainActivity : ComponentActivity() {
@@ -62,8 +63,24 @@ class MainActivity : ComponentActivity() {
             }
         })
 
+//        setContent {
+//            Test()
+//        }
         setContent {
-            Test()
+            when (currentPage.value) {
+                PAGES.WALKTHROUGH -> {
+                    WalkThroughScreen()
+                }
+                PAGES.LOGIN -> {
+                    LoginScreen()
+                }
+                PAGES.MAINPAGE -> {
+                    MainScreen()
+                }
+                PAGES.BUYTOKEN -> {
+                    BuyTokenScreen()
+                }
+            }
         }
     }
     private fun purchaseProduct(context: Context, productId: String) {
