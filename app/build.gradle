@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.summarizer'
+    namespace 'com.falcon.summarizer'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.summarizer"
+        applicationId "com.falcon.summarizer"
         minSdk 24
         targetSdk 34
         versionCode 1
