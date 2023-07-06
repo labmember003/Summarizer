@@ -2,6 +2,7 @@ package com.example.summarizer
 
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,11 +35,11 @@ import com.android.billingclient.api.BillingResult
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.SkuDetailsParams
-import com.example.summarizer.DataManager.currentPage
+import com.example.summarizer.DataManager.USER_TOKEN
 import com.falcon.summarizer.R
-import org.bouncycastle.util.test.Test
 
 class MainActivity : ComponentActivity() {
+    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var billingClient: BillingClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,12 +119,15 @@ class MainActivity : ComponentActivity() {
     }
 
     fun grantTokens(tokens: Int) {
-
+        sharedPreferences
+        val editor = sharedPreferences.edit()
+        editor.putString(USER_TOKEN, tokens.toString())
+        editor.apply()
     }
     @Composable
     fun Test() {
         val context = LocalContext.current
-        val sharedPreferences = remember {
+        sharedPreferences = remember {
             context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
         }
 
