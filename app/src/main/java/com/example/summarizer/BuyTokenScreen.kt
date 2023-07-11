@@ -1,5 +1,6 @@
 package com.example.summarizer
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,20 +9,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -40,15 +47,42 @@ val FontName = FontFamily(
 )
 @Composable
 fun BuyTokenScreen() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
     ) {
-        Heading()
-        Features()
+        Image(
+            painter = painterResource(id = R.drawable.login_background),
+            contentDescription = "login_background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds,
 
+        )
+        Card(
+            elevation = 4.dp,
+            border = BorderStroke(1.dp, colorResource(id = R.color.purple_blue)),
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .padding(32.dp)
+                .fillMaxWidth()
+                .align(Alignment.Center)
+        ) {
 
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                Heading()
+                Features()
+            }
+        }
     }
+
+
 
 }
 
@@ -56,9 +90,11 @@ fun BuyTokenScreen() {
 @Composable
 fun ColumnScope.Features() {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            .weight(1f)
+            .fillMaxWidth()
+//            .weight(1f)
     ) {
         Text(
             text = "Unlock Unlimited Access",
@@ -68,7 +104,8 @@ fun ColumnScope.Features() {
                 fontWeight = FontWeight.SemiBold
             ),
             modifier = Modifier
-                .padding(0.dp, 16.dp, 0.dp, 56.dp)
+                .align(Alignment.CenterHorizontally)
+//                .padding(0.dp, 16.dp, 0.dp, 56.dp)
         )
         Feature(R.drawable.chatbot, "Powered By GPT - 4", "Latest ChatGPT AI Model")
         Feature(R.drawable.speedometer, "Higher Word Limits", "Type Longer Messages")
@@ -81,7 +118,7 @@ fun Feature(imageId: Int, text: String, extraText: String) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.Start,
         modifier = Modifier
             .padding(8.dp)
     ) {
@@ -90,30 +127,38 @@ fun Feature(imageId: Int, text: String, extraText: String) {
             contentDescription = text,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
-                .size(45.dp) // Adjust the size according to your needs
+                .size(32.dp) // Adjust the size according to your needs
                 .padding(end = 12.dp)
         )
-        Column(
-            modifier = Modifier
-                .padding(4.dp, 0.dp)
-        ) {
-            Text(
-                text = text,
-                style = TextStyle(
-                    fontFamily = FontName,
-                    fontWeight = FontWeight.Normal
-                ),
-                fontSize = 24.sp
-            )
-            Text(
-                text = extraText,
-                fontSize = 16.sp,
-                style = TextStyle(
-                    fontFamily = FontName,
-                    fontWeight = FontWeight.Normal
-                )
-            )
-        }
+//        Column(
+//            modifier = Modifier
+//                .padding(4.dp, 0.dp)
+//        ) {
+//            Text(
+//                text = text,
+//                style = TextStyle(
+//                    fontFamily = FontName,
+//                    fontWeight = FontWeight.Normal
+//                ),
+//                fontSize = 24.sp
+//            )
+//            Text(
+//                text = extraText,
+//                fontSize = 16.sp,
+//                style = TextStyle(
+//                    fontFamily = FontName,
+//                    fontWeight = FontWeight.Normal
+//                )
+//            )
+//        }
+        Text(
+            text = text,
+//            style = TextStyle(
+//                fontFamily = FontName,
+//                fontWeight = FontWeight.Normal
+//            ),
+            fontSize = 24.sp
+        )
     }
 }
 

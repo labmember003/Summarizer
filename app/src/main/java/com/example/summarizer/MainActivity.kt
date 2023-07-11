@@ -4,17 +4,26 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Surface
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +34,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
@@ -37,15 +52,104 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.SkuDetailsParams
 import com.example.summarizer.DataManager.USER_TOKEN
 import com.example.summarizer.DataManager.currentPage
+import com.example.summarizer.presentation.profile.ProfileScreen
+import com.example.summarizer.presentation.sign_in.GoogleAuthUiClient
+import com.example.summarizer.presentation.sign_in.SignInScreen
+import com.example.summarizer.presentation.sign_in.SignInViewModel
 import com.falcon.summarizer.R
+import com.google.android.gms.auth.api.identity.Identity
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private val googleAuthUiClient by lazy {
+        GoogleAuthUiClient(
+            context = applicationContext,
+            oneTapClient = Identity.getSignInClient(applicationContext)
+        )
+    }
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var billingClient: BillingClient
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContent {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background
+            ) {
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = "sign_in") {
 
+                    composable("sign_in") {
+                        val viewModel = viewModel<SignInViewModel>()
+                        val state by viewModel.state.collectAsStateWithLifecycle()
+
+                        LaunchedEffect(key1 = Unit) {
+                            if(googleAuthUiClient.getSignedInUser() != null) {
+                                navController.navigate("profile")
+                            }
+                        }
+
+                        val launcher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.StartIntentSenderForResult(),
+                            onResult = { result ->
+                                if(result.resultCode == RESULT_OK) {
+                                    lifecycleScope.launch {
+                                        val signInResult = googleAuthUiClient.signInWithIntent(
+                                            intent = result.data ?: return@launch
+                                        )
+                                        viewModel.onSignInResult(signInResult)
+                                    }
+                                }
+                            }
+                        )
+
+                        LaunchedEffect(key1 = state.isSignInSuccessful) {
+                            if(state.isSignInSuccessful) {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Sign in successful",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                navController.navigate("profile")
+                                viewModel.resetState()
+                            }
+                        }
+
+                        SignInScreen(
+                            state = state,
+                            onSignInClick = {
+                                lifecycleScope.launch {
+                                    val signInIntentSender = googleAuthUiClient.signIn()
+                                    launcher.launch(
+                                        IntentSenderRequest.Builder(
+                                            signInIntentSender ?: return@launch
+                                        ).build()
+                                    )
+                                }
+                            }
+                        )
+                    }
+                    composable("profile") {
+                        ProfileScreen(
+                            userData = googleAuthUiClient.getSignedInUser(),
+                            onSignOut = {
+                                lifecycleScope.launch {
+                                    googleAuthUiClient.signOut()
+                                    Toast.makeText(
+                                        applicationContext,
+                                        "Signed out",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+
+                                    navController.popBackStack()
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
         billingClient = BillingClient.newBuilder(this)
             .setListener(purchaseUpdateListener)
             .enablePendingPurchases()
@@ -66,22 +170,29 @@ class MainActivity : ComponentActivity() {
 //        setContent {
 //            Test()
 //        }
-        setContent {
-            when (currentPage.value) {
-                PAGES.WALKTHROUGH -> {
-                    WalkThroughScreen()
-                }
-                PAGES.LOGIN -> {
-                    LoginScreen()
-                }
-                PAGES.MAINPAGE -> {
-                    MainScreen()
-                }
-                PAGES.BUYTOKEN -> {
-                    BuyTokenScreen()
-                }
-            }
-        }
+//        setContent {
+//            when (currentPage.value) {
+//                PAGES.WALKTHROUGH -> {
+//                    WalkThroughScreen()
+//                }
+//                PAGES.LOGIN -> {
+//                    LoginScreen()
+//                }
+//                PAGES.MAINPAGE -> {
+//                    MainScreen()
+//                }
+//                PAGES.BUYTOKEN -> {
+//                    BuyTokenScreen()
+//                }
+//            }
+//        }
+    }
+
+    @Composable
+    fun LoginWithGoogle() {
+            // A surface container using the 'background' color from the theme
+
+
     }
     private fun purchaseProduct(context: Context, productId: String) {
         val skuDetailsParams = SkuDetailsParams.newBuilder()
@@ -135,8 +246,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun grantTokens(tokens: Int) {
-        sharedPreferences
+    private fun grantTokens(tokens: Int) {
+        Log.i("TokenToken", "tokens.toString()")
+        Log.i("TokenToken", tokens.toString())
         val editor = sharedPreferences.edit()
         editor.putString(USER_TOKEN, tokens.toString())
         editor.apply()

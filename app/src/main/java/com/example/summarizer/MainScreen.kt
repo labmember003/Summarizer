@@ -54,7 +54,10 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.summarizer.retrofit.ApiUtilities
+import com.example.summarizer.retrofit.ChatRequest
 import com.falcon.summarizer.R
+import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
@@ -62,7 +65,12 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
 import java.io.IOException
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -83,12 +91,14 @@ fun MainScreen() {
             val text = extractTextFromPdf(uri, context)
             Log.i("hapyhapyhapy", "text")
             Log.i("hapyhapyhapy", text)
+            getResponseFromApi(text)
         }
     }
     val launcher2 = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             val bitmap: Bitmap = uriToBitmap(context, it)
-            getTextFromImage(bitmap, recognizer, context)
+            val text = getTextFromImage(bitmap, recognizer, context)
+            getResponseFromApi(text)
         }
     }
     ModalBottomSheetLayout(
@@ -112,6 +122,37 @@ fun MainScreen() {
     }
 }
 
+fun getResponseFromApi(prompt: String) {
+    val requestBody = RequestBody.create(
+        "application/json".toMediaType(),
+        Gson().toJson(
+            ChatRequest(
+                250,
+                "text-davinci-003",
+                prompt = "Summarise this text: \n$prompt",
+                0.7
+            )
+        )
+    )
+    val contentType = "application/json"
+    val authorization = "Bearer ${Utils.API_KEY}"
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val response = ApiUtilities.getApiInterface().getChat(
+                contentType, authorization, requestBody
+            )
+            val textResponse = response.choices.first().text
+            Log.i("fownfpownf", textResponse)
+        } catch (e : Exception){
+
+            withContext(Dispatchers.Main){
+                Log.i("errorWaliBilli", e.toString())
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun MainScreenContent(
     modalSheetState: ModalBottomSheetState
@@ -304,7 +345,8 @@ private fun extractTextFromPdf(uri: Uri, context: Context): String {
     return text
 }
 
-private fun getTextFromImage(bitmap: Bitmap, recognizer: TextRecognizer, context: Context){
+private fun getTextFromImage(bitmap: Bitmap, recognizer: TextRecognizer, context: Context): String {
+    var extractedText = ""
     val image = bitmap.let {
         InputImage.fromBitmap(it, 0)
     }
@@ -312,10 +354,12 @@ private fun getTextFromImage(bitmap: Bitmap, recognizer: TextRecognizer, context
         recognizer.process(it)
             .addOnSuccessListener { visionText ->
                 Log.i("kaaali billi", visionText.text)
+                extractedText = visionText.text
                 Toast.makeText(context, visionText.text, Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
-
+                extractedText = "Error - $e"
             }
     }
+    return extractedText
 }

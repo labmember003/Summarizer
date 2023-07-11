@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1041533490310",
+    "project_id": "summarizer-607d3",
+    "storage_bucket": "summarizer-607d3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041533490310:android:7cc105a3746aa82bbe2d07",
+        "android_client_info": {
+          "package_name": "com.falcon.summarizer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1041533490310-fm01d95o2qgdqloul0pbivua2cs3epg3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiXvo7gOAmTZlWSUx9bOBvlkDdTJ28bCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1041533490310-fm01d95o2qgdqloul0pbivua2cs3epg3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
