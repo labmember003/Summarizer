@@ -1,6 +1,7 @@
 package com.example.summarizer.presentation.profile
 
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.summarizer.TokenManager
 import com.example.summarizer.presentation.sign_in.UserData
 
 @Composable
@@ -50,5 +52,31 @@ fun ProfileScreen(
         Button(onClick = onSignOut) {
             Text(text = "Sign out")
         }
+        Text(text = userData?.userId.toString())
+
+
+        val tokenManager = TokenManager()
+
+
+
+//         Call updateToken() to update the token count
+//        val tokensUsed = 20
+//        tokenManager.updateToken(tokensUsed.toLong())
+
+        // Call getToken() to retrieve the token count
+        tokenManager.getToken { tokenCount ->
+            if (tokenCount != null) {
+                // Use the tokenCount value here
+                println("Token count: $tokenCount")
+                Log.i("kwfkbwekef", tokenCount.toString())
+            } else {
+                // Handle the case where the token count is not available
+                //         Call putToken() to store the token count
+                val initialTokenCount = 100
+                tokenManager.putToken(initialTokenCount.toLong())
+                println("New Registration, Granted 100 Token")
+            }
+        }
+
     }
 }
