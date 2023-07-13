@@ -49,4 +49,26 @@ class TokenManager {
                 Log.i(Utils.ERROR_TAG, e.message.toString())
             }
     }
+
+    fun getTokenCount(): Long? {
+        var tokenCount: Long? = null
+        try {
+            val userDocRef = db.collection("users").document(user?.uid ?: "")
+            userDocRef.get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+                        tokenCount = documentSnapshot.getLong("tokenCount")
+                    } else {
+//                    callback(null)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.i(Utils.ERROR_TAG, e.message.toString())
+                }
+
+        } catch(e: Exception) {
+            return null
+        }
+        return tokenCount
+    }
 }

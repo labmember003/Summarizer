@@ -77,6 +77,8 @@ import java.io.IOException
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MainScreen() {
+    val tokenManager = TokenManager()
+
     val context = LocalContext.current
     val modalSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -117,7 +119,8 @@ fun MainScreen() {
         }
     ) {
         MainScreenContent(
-            modalSheetState = modalSheetState
+            modalSheetState = modalSheetState,
+            tokenManager = tokenManager
         )
     }
 }
@@ -155,7 +158,8 @@ fun getResponseFromApi(prompt: String) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun MainScreenContent(
-    modalSheetState: ModalBottomSheetState
+    modalSheetState: ModalBottomSheetState,
+    tokenManager: TokenManager
 ) {
     val scope = rememberCoroutineScope()
     Column(
@@ -185,7 +189,8 @@ private fun MainScreenContent(
                         .align(Alignment.CenterEnd)
                         .clip(RoundedCornerShape(8.dp))
                         .background(colorResource(id = R.color.light_grey))
-                        .padding(8.dp)
+                        .padding(8.dp),
+                    tokenManager = tokenManager
                 )
             }
             UploadAnimation(
@@ -241,7 +246,7 @@ fun ColumnScope.UploadAnimation(
 }
 
 @Composable
-fun Tokens(modifier: Modifier) {
+fun Tokens(modifier: Modifier, tokenManager: TokenManager) {
     Row(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
@@ -258,7 +263,7 @@ fun Tokens(modifier: Modifier) {
                 }
         )
         Text(
-            text = "100",
+            text = tokenManager.getTokenCount().toString(),
         )
     }
 }

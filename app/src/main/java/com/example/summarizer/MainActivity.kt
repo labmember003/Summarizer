@@ -71,85 +71,90 @@ class MainActivity : ComponentActivity() {
     private lateinit var billingClient: BillingClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colors.background
-            ) {
-                val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "sign_in") {
+//        setContent {
+//            Surface(
+//                modifier = Modifier.fillMaxSize(),
+//                color = MaterialTheme.colors.background
+//            ) {
+//                val navController = rememberNavController()
+//                NavHost(navController = navController, startDestination = "sign_in") {
+//
+//                    composable("sign_in") {
+//                        val viewModel = viewModel<SignInViewModel>()
+//                        val state by viewModel.state.collectAsStateWithLifecycle()
+//
+//                        LaunchedEffect(key1 = Unit) {
+//                            if(googleAuthUiClient.getSignedInUser() != null) {
+//                                navController.navigate("profile")
+//                            }
+//                        }
+//
+//                        val launcher = rememberLauncherForActivityResult(
+//                            contract = ActivityResultContracts.StartIntentSenderForResult(),
+//                            onResult = { result ->
+//                                if(result.resultCode == RESULT_OK) {
+//                                    lifecycleScope.launch {
+//                                        val signInResult = googleAuthUiClient.signInWithIntent(
+//                                            intent = result.data ?: return@launch
+//                                        )
+//                                        viewModel.onSignInResult(signInResult)
+//                                    }
+//                                }
+//                            }
+//                        )
+//
+//                        LaunchedEffect(key1 = state.isSignInSuccessful) {
+//                            if(state.isSignInSuccessful) {
+//                                Toast.makeText(
+//                                    applicationContext,
+//                                    "Sign in successful",
+//                                    Toast.LENGTH_LONG
+//                                ).show()
+//
+//                                navController.navigate("profile")
+//                                viewModel.resetState()
+//                            }
+//                        }
+//
+//                        SignInScreen(
+//                            state = state,
+//                            onSignInClick = {
+//                                lifecycleScope.launch {
+//                                    val signInIntentSender = googleAuthUiClient.signIn()
+//                                    launcher.launch(
+//                                        IntentSenderRequest.Builder(
+//                                            signInIntentSender ?: return@launch
+//                                        ).build()
+//                                    )
+//                                }
+//                            }
+//                        )
+//                    }
+//                    composable("profile") {
+//                        ProfileScreen(
+//                            userData = googleAuthUiClient.getSignedInUser(),
+//                            onSignOut = {
+//                                lifecycleScope.launch {
+//                                    googleAuthUiClient.signOut()
+//                                    Toast.makeText(
+//                                        applicationContext,
+//                                        "Signed out",
+//                                        Toast.LENGTH_LONG
+//                                    ).show()
+//
+//                                    navController.popBackStack()
+//                                }
+//                            }
+//                        )
+//                    }
+//                }
+//            }
+//        }
 
-                    composable("sign_in") {
-                        val viewModel = viewModel<SignInViewModel>()
-                        val state by viewModel.state.collectAsStateWithLifecycle()
 
-                        LaunchedEffect(key1 = Unit) {
-                            if(googleAuthUiClient.getSignedInUser() != null) {
-                                navController.navigate("profile")
-                            }
-                        }
 
-                        val launcher = rememberLauncherForActivityResult(
-                            contract = ActivityResultContracts.StartIntentSenderForResult(),
-                            onResult = { result ->
-                                if(result.resultCode == RESULT_OK) {
-                                    lifecycleScope.launch {
-                                        val signInResult = googleAuthUiClient.signInWithIntent(
-                                            intent = result.data ?: return@launch
-                                        )
-                                        viewModel.onSignInResult(signInResult)
-                                    }
-                                }
-                            }
-                        )
 
-                        LaunchedEffect(key1 = state.isSignInSuccessful) {
-                            if(state.isSignInSuccessful) {
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Sign in successful",
-                                    Toast.LENGTH_LONG
-                                ).show()
 
-                                navController.navigate("profile")
-                                viewModel.resetState()
-                            }
-                        }
-
-                        SignInScreen(
-                            state = state,
-                            onSignInClick = {
-                                lifecycleScope.launch {
-                                    val signInIntentSender = googleAuthUiClient.signIn()
-                                    launcher.launch(
-                                        IntentSenderRequest.Builder(
-                                            signInIntentSender ?: return@launch
-                                        ).build()
-                                    )
-                                }
-                            }
-                        )
-                    }
-                    composable("profile") {
-                        ProfileScreen(
-                            userData = googleAuthUiClient.getSignedInUser(),
-                            onSignOut = {
-                                lifecycleScope.launch {
-                                    googleAuthUiClient.signOut()
-                                    Toast.makeText(
-                                        applicationContext,
-                                        "Signed out",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-
-                                    navController.popBackStack()
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-        }
         billingClient = BillingClient.newBuilder(this)
             .setListener(purchaseUpdateListener)
             .enablePendingPurchases()
@@ -167,9 +172,9 @@ class MainActivity : ComponentActivity() {
             }
         })
 
-//        setContent {
-//            Test()
-//        }
+        setContent {
+            Test()
+        }
 //        setContent {
 //            when (currentPage.value) {
 //                PAGES.WALKTHROUGH -> {
@@ -243,15 +248,27 @@ class MainActivity : ComponentActivity() {
                 "250_coins_id" -> grantTokens(250)
                 "500_coins_id" -> grantTokens(500)
             }
+        } else if (purchase.purchaseState == Purchase.PurchaseState.UNSPECIFIED_STATE) {
+            // Purchase was canceled by the user
+            // Display a message to the user indicating the cancellation
+            Log.i("TokenToken", "Purchase canceled by the user")
         }
     }
 
     private fun grantTokens(tokens: Int) {
-        Log.i("TokenToken", "tokens.toString()")
-        Log.i("TokenToken", tokens.toString())
-        val editor = sharedPreferences.edit()
-        editor.putString(USER_TOKEN, tokens.toString())
-        editor.apply()
+//        Log.i("meowmeowmeowmeowhappy", "Account Not Signed")
+        val tokenManager = TokenManager()
+        val tokenCount: Long = tokenManager.getTokenCount() ?: -1
+        if (tokenCount.toInt() == -1) {
+            Log.i("meowmeowmeowmeow", "Account Not Signed")
+        } else {
+            tokenManager.updateToken(tokenCount + tokens.toLong())
+        }
+//        Log.i("TokenToken", "tokens.toString()")
+//        Log.i("TokenToken", tokens.toString())
+//        val editor = sharedPreferences.edit()
+//        editor.putString(USER_TOKEN, tokens.toString())
+//        editor.apply()
     }
     @Composable
     fun Test() {

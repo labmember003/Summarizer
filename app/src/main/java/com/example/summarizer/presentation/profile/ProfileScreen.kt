@@ -64,18 +64,31 @@ fun ProfileScreen(
 //        tokenManager.updateToken(tokensUsed.toLong())
 
         // Call getToken() to retrieve the token count
-        tokenManager.getToken { tokenCount ->
-            if (tokenCount != null) {
-                // Use the tokenCount value here
-                println("Token count: $tokenCount")
-                Log.i("kwfkbwekef", tokenCount.toString())
-            } else {
-                // Handle the case where the token count is not available
-                //         Call putToken() to store the token count
-                val initialTokenCount = 100
-                tokenManager.putToken(initialTokenCount.toLong())
-                println("New Registration, Granted 100 Token")
-            }
+//        tokenManager.getToken { tokenCount ->
+//            if (tokenCount != null) {
+//                // Use the tokenCount value here
+//                println("Token count: $tokenCount")
+//                Log.i("kwfkbwekef", tokenCount.toString())
+//            } else {
+//                // Handle the case where the token count is not available
+//                //         Call putToken() to store the token count
+//                val initialTokenCount = 100
+//                tokenManager.putToken(initialTokenCount.toLong())
+//                println("New Registration, Granted 100 Token")
+//            }
+//        }
+
+
+        val tokenCount = tokenManager.getTokenCount()
+        if (tokenCount != null) {
+            println("Token count: $tokenCount")
+            Log.i("kwfkbwekef", tokenCount.toString())
+        } else {
+            // Handle the case where the token count is not available
+            //         Call putToken() to store the token count
+            val initialTokenCount = 100
+            tokenManager.putToken(initialTokenCount.toLong())
+            println("New Registration, Granted 100 Token")
         }
 
     }
