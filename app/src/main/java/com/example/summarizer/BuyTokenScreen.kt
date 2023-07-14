@@ -1,5 +1,6 @@
 package com.example.summarizer
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,8 +10,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -19,7 +22,13 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.NoAccounts
+import androidx.compose.material.icons.filled.NotInterested
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -27,7 +36,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -45,9 +56,12 @@ val FontName = FontFamily(
     Font(R.font.nunito, FontWeight.Bold),
     Font(R.font.nunito, FontWeight.ExtraBold)
 )
+@Preview(showBackground = true)
 @Composable
-fun BuyTokenScreen() {
+fun BuyTokenScreen(
 
+) {
+    val context = LocalContext.current
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
@@ -57,7 +71,6 @@ fun BuyTokenScreen() {
             contentDescription = "login_background",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillBounds,
-
         )
         Card(
             elevation = 4.dp,
@@ -74,10 +87,17 @@ fun BuyTokenScreen() {
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(5.dp)
             ) {
                 Heading()
                 Features()
+                Spacer(
+                    modifier = Modifier
+                        .height(10.dp)
+                )
+                BuyToken(100, 50, {}, context)
+                BuyToken(200, 100, {}, context)
+                BuyToken(500, 250, {}, context)
             }
         }
     }
@@ -107,14 +127,18 @@ fun ColumnScope.Features() {
                 .align(Alignment.CenterHorizontally)
 //                .padding(0.dp, 16.dp, 0.dp, 56.dp)
         )
-        Feature(R.drawable.chatbot, "Powered By GPT - 4", "Latest ChatGPT AI Model")
-        Feature(R.drawable.speedometer, "Higher Word Limits", "Type Longer Messages")
-        Feature(R.drawable.ad, "No Ads", "Enjoy Summarizer without ads")
+        Spacer(
+            modifier = Modifier
+                .height(10.dp)
+        )
+        Feature(Icons.Filled.SmartToy, "Powered By GPT - 4", "Latest ChatGPT AI Model")
+        Feature(Icons.Filled.Description, "Higher Word Limits", "Type Longer Messages")
+        Feature(Icons.Filled.NotInterested, "No Ads", "Enjoy Summarizer without ads")
     }
 }
 
 @Composable
-fun Feature(imageId: Int, text: String, extraText: String) {
+fun Feature(imageId: ImageVector, text: String, extraText: String) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -122,14 +146,14 @@ fun Feature(imageId: Int, text: String, extraText: String) {
         modifier = Modifier
             .padding(8.dp)
     ) {
-        Image(
-            painter = painterResource(id = imageId),
-            contentDescription = text,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .size(32.dp) // Adjust the size according to your needs
-                .padding(end = 12.dp)
-        )
+//        Image(
+//            painter = painterResource(id = imageId),
+//            contentDescription = text,
+//            contentScale = ContentScale.FillBounds,
+//            modifier = Modifier
+//                .size(32.dp) // Adjust the size according to your needs
+//                .padding(end = 12.dp)
+//        )
 //        Column(
 //            modifier = Modifier
 //                .padding(4.dp, 0.dp)
@@ -151,13 +175,23 @@ fun Feature(imageId: Int, text: String, extraText: String) {
 //                )
 //            )
 //        }
+//        val accountCircleIcon: ImageVector = Icons.Filled.SmartToy
+//        val accountCircleIcon: ImageVector = Icons.Filled.Description
+//        val accountCircleIcon: ImageVector = Icons.Filled.NotInterested
+        Icon(
+            imageVector = imageId,
+            contentDescription = "Account",
+            modifier = Modifier
+//                .size(32.dp) // Adjust the size according to your needs
+                .padding(end = 12.dp)
+        )
         Text(
             text = text,
 //            style = TextStyle(
 //                fontFamily = FontName,
 //                fontWeight = FontWeight.Normal
 //            ),
-            fontSize = 24.sp
+            fontSize = 19.sp
         )
     }
 }
@@ -166,7 +200,7 @@ fun Feature(imageId: Int, text: String, extraText: String) {
 private fun Heading() {
     Box(
         modifier = Modifier
-            .padding(24.dp, 48.dp)
+            .padding(24.dp)
             .fillMaxWidth(1f)
     ) {
         Text(
@@ -198,4 +232,43 @@ private fun Heading() {
             )
         }
     }
+}
+
+@Composable
+fun ColumnScope.BuyToken(tokenCount: Int, priceInINR: Int, onCLick: () -> Unit, context: Context) {
+    Card(elevation = 4.dp,
+        border = BorderStroke(1.dp, colorResource(id = R.color.purple_blue)),
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxWidth()
+            .align(Alignment.CenterHorizontally)
+            .clickable {
+                onCLick()
+            }
+    )
+    {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(10.dp)
+        ) {
+            Text(
+                text = "$tokenCount Tokens",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold
+                ),
+                fontSize = 18.sp
+            )
+            Text(
+                text = "$priceInINR Rupees",
+                style = TextStyle(
+                    fontFamily = FontName,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+        }
+    }
+    
 }

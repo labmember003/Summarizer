@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
             oneTapClient = Identity.getSignInClient(applicationContext)
         )
     }
-    private lateinit var sharedPreferences: SharedPreferences
+//    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var billingClient: BillingClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -172,25 +172,25 @@ class MainActivity : ComponentActivity() {
             }
         })
 
-        setContent {
-            Test()
-        }
 //        setContent {
-//            when (currentPage.value) {
-//                PAGES.WALKTHROUGH -> {
-//                    WalkThroughScreen()
-//                }
-//                PAGES.LOGIN -> {
-//                    LoginScreen()
-//                }
-//                PAGES.MAINPAGE -> {
-//                    MainScreen()
-//                }
-//                PAGES.BUYTOKEN -> {
-//                    BuyTokenScreen()
-//                }
-//            }
+//            Test()
 //        }
+        setContent {
+            when (currentPage.value) {
+                PAGES.WALKTHROUGH -> {
+                    WalkThroughScreen()
+                }
+                PAGES.LOGIN -> {
+                    LoginScreen()
+                }
+                PAGES.MAINPAGE -> {
+                    MainScreen()
+                }
+                PAGES.BUYTOKEN -> {
+                    BuyTokenScreen()
+                }
+            }
+        }
     }
 
     @Composable
@@ -273,9 +273,9 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun Test() {
         val context = LocalContext.current
-        sharedPreferences = remember {
-            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
-        }
+//        sharedPreferences = remember {
+//            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+//        }
 
         Row {
             Button(onClick = {
