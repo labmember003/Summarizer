@@ -120,7 +120,7 @@ class MainActivity : ComponentActivity() {
                     composable("walk_through_screen") {
                         LaunchedEffect(key1 = Unit) {
                             if(googleAuthUiClient.getSignedInUser() != null) {
-                                navController.navigate("profile")
+                                navController.navigate("main_screen")
                             }
                         }
                         WalkThroughScreen {
