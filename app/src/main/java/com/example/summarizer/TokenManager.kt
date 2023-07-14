@@ -52,27 +52,27 @@ class TokenManager {
             }
     }
 
-    fun getTokenCount(): Long? {
-        Log.i("qwertyuiop", "qwedfr")
-        var tokenCount: Long? = null
-        try {
-            val userDocRef = db.collection("users").document(user?.uid ?: "")
-            userDocRef.get()
-                .addOnSuccessListener { documentSnapshot ->
-                    if (documentSnapshot.exists()) {
-                        tokenCount = documentSnapshot.getLong("tokenCount")
-                    } else {
-//                    callback(null)
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Log.i(Utils.ERROR_TAG, e.message.toString())
-                }
-
-        } catch(e: Exception) {
-            return null
-        }
-        Log.i("qwertyuiop", tokenCount.toString())
-        return tokenCount
-    }
+//    fun getTokenCount(): Long? {
+//        Log.i("qwertyuiop", "qwedfr")
+//        var tokenCount: Long? = null
+//        try {
+//            val userDocRef = db.collection("users").document(user?.uid ?: "")
+//            userDocRef.get()
+//                .addOnSuccessListener { documentSnapshot ->
+//                    if (documentSnapshot.exists()) {
+//                        tokenCount = documentSnapshot.getLong("tokenCount")
+//                    } else {
+////                    callback(null)
+//                    }
+//                }
+//                .addOnFailureListener { e ->
+//                    Log.i(Utils.ERROR_TAG, e.message.toString())
+//                }
+//
+//        } catch(e: Exception) {
+//            return null
+//        }
+//        Log.i("qwertyuiop", tokenCount.toString())
+//        return tokenCount
+//    }
 }

@@ -312,11 +312,21 @@ class MainActivity : ComponentActivity() {
     private fun grantTokens(tokens: Int) {
 //        Log.i("meowmeowmeowmeowhappy", "Account Not Signed")
         val tokenManager = TokenManager()
-        val tokenCount: Long = tokenManager.getTokenCount() ?: -1
-        if (tokenCount.toInt() == -1) {
+        var tokenCountOutSide: Long = -1
+
+        tokenManager.getToken { tokenCount ->
+            if (tokenCount != null) {
+                tokenCountOutSide = tokenCount
+                println("Token count meow: $tokenCount")
+                Log.i("kwfkbwekef", tokenCount.toString())
+                println("Token count meow: $tokenCount")
+            }
+        }
+
+        if (tokenCountOutSide.toInt() == -1) {
             Log.i("meowmeowmeowmeow", "Account Not Signed")
         } else {
-            tokenManager.updateToken(tokenCount + tokens.toLong())
+            tokenManager.updateToken(tokenCountOutSide + tokens.toLong())
         }
 //        Log.i("TokenToken", "tokens.toString()")
 //        Log.i("TokenToken", tokens.toString())
