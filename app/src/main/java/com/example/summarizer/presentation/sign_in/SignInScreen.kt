@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.summarizer.GoogleSignInCard
+import com.example.summarizer.GoogleSignInMainScreen
 
 @Composable
 fun SignInScreen(
@@ -29,15 +31,16 @@ fun SignInScreen(
             ).show()
         }
     }
+    GoogleSignInMainScreen(onSignInClick)
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Button(onClick = onSignInClick) {
-            Text(text = "Sign in")
-        }
-    }
+//    Box(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        Button(onClick = onSignInClick) {
+//            Text(text = "Sign in")
+//        }
+//    }
 }

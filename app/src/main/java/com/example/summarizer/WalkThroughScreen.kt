@@ -40,7 +40,9 @@ val walkThroughPagerContent = listOf(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun WalkThroughScreen() {
+fun WalkThroughScreen(
+    onNextCLick: () -> Unit
+) {
     val pageState = rememberPagerState()
     Column(
         modifier = Modifier
@@ -69,7 +71,8 @@ fun WalkThroughScreen() {
                 color = colorResource(id = R.color.custom_color_primary),
                 modifier = Modifier
                     .clickable {
-                        currentPage.value = PAGES.LOGIN
+//                        currentPage.value = PAGES.LOGIN
+                        onNextCLick()
                     }
             )
         }
@@ -97,7 +100,8 @@ fun WalkThroughScreen() {
                 .align(Alignment.CenterHorizontally)
                 .padding(56.dp),
             onClick = {
-                currentPage.value = PAGES.LOGIN
+//                currentPage.value = PAGES.LOGIN
+                onNextCLick()
             }) {
             Text(
                 text = "Get Started"
