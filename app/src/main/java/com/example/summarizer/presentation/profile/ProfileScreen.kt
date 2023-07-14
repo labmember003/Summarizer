@@ -79,17 +79,17 @@ fun ProfileScreen(
 //        }
 
 
-        val tokenCount = tokenManager.getTokenCount()
-        if (tokenCount != null) {
-            println("Token count: $tokenCount")
-            Log.i("kwfkbwekef", tokenCount.toString())
-        } else {
-            // Handle the case where the token count is not available
-            //         Call putToken() to store the token count
-            val initialTokenCount = 100
-            tokenManager.putToken(initialTokenCount.toLong())
-            println("New Registration, Granted 100 Token")
-        }
+//        val tokenCount = tokenManager.getTokenCount()
+//        if (tokenCount != null) {
+//            println("Token count: $tokenCount")
+//            Log.i("kwfkbwekef", tokenCount.toString())
+//        } else {
+//            // Handle the case where the token count is not available
+//            //         Call putToken() to store the token count
+//            val initialTokenCount = 100
+//            tokenManager.putToken(initialTokenCount.toLong())
+//            println("New Registration, Granted 100 Token")
+//        }
 
     }
 }

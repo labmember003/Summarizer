@@ -74,9 +74,10 @@ import okhttp3.RequestBody
 import java.io.IOException
 
 @OptIn(ExperimentalMaterialApi::class)
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onTokenCountClick: () -> Unit
+) {
     val tokenManager = TokenManager()
 
     val context = LocalContext.current
@@ -120,7 +121,8 @@ fun MainScreen() {
     ) {
         MainScreenContent(
             modalSheetState = modalSheetState,
-            tokenManager = tokenManager
+            tokenManager = tokenManager,
+            onTokenCountClick = onTokenCountClick
         )
     }
 }
@@ -159,7 +161,8 @@ fun getResponseFromApi(prompt: String) {
 @Composable
 private fun MainScreenContent(
     modalSheetState: ModalBottomSheetState,
-    tokenManager: TokenManager
+    tokenManager: TokenManager,
+    onTokenCountClick: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     Column(
@@ -190,7 +193,8 @@ private fun MainScreenContent(
                         .clip(RoundedCornerShape(8.dp))
                         .background(colorResource(id = R.color.light_grey))
                         .padding(8.dp),
-                    tokenManager = tokenManager
+                    tokenManager = tokenManager,
+                    onTokenCountClick = onTokenCountClick
                 )
             }
             UploadAnimation(
@@ -246,11 +250,14 @@ fun ColumnScope.UploadAnimation(
 }
 
 @Composable
-fun Tokens(modifier: Modifier, tokenManager: TokenManager) {
+fun Tokens(modifier: Modifier, tokenManager: TokenManager, onTokenCountClick: () -> Unit) {
     Row(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
+            .clickable {
+                onTokenCountClick()
+            }
     ) {
         Image(
             painter = painterResource(R.drawable.token),
@@ -258,12 +265,60 @@ fun Tokens(modifier: Modifier, tokenManager: TokenManager) {
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(32.dp)
-                .clickable {
-                    DataManager.currentPage.value = PAGES.BUYTOKEN
-                }
         )
+//        val tokenCount = remember { mutableStateOf(tokenManager.getTokenCount()) }
+//        val tokenCount2 = tokenCount.value
+//        if (tokenCount2 != null) {
+//            println("Token count: $tokenCount2")
+//            Log.i("kwfkbwekef", tokenCount2.toString())
+//        } else {
+//            // Handle the case where the token count is not available
+//            //         Call putToken() to store the token count
+////            val initialTokenCount = 100
+////            tokenManager.putToken(initialTokenCount.toLong())
+//
+//
+//
+//            tokenManager.getToken { tokenCount ->
+//                if (tokenCount != null) {
+//                    // Use the tokenCount value here
+//                    println("Token count: $tokenCount")
+//                    Log.i("kwfkbwekef", tokenCount.toString())
+//                } else {
+//                    // Handle the case where the token count is not available
+//                    //         Call putToken() to store the token count
+////                    val initialTokenCount = 100
+////                    tokenManager.putToken(initialTokenCount.toLong())
+////                    println("New Registration, Granted 100 Token")
+//                }
+//            }
+//
+//
+//
+//
+//            println("New Registration, Granted 100 Token")
+//            println("billi mausi" + tokenManager.getTokenCount().toString() + "billi mausi")
+//        }
+        val minusOne : Long = -1
+        val tokenCountOut = remember { mutableStateOf(minusOne) }
+        tokenManager.getToken { tokenCount ->
+            if (tokenCount != null) {
+                // Use the tokenCount value here
+                tokenCountOut.value = tokenCount
+                println("Token count meow: $tokenCount")
+                Log.i("kwfkbwekef", tokenCount.toString())
+                println("Token count meow: $tokenCount")
+            } else {
+                // Handle the case where the token count is not available
+                //         Call putToken() to store the token count
+//                    val initialTokenCount = 100
+//                    tokenManager.putToken(initialTokenCount.toLong())
+//                    println("New Registration, Granted 100 Token")
+            }
+        }
+
         Text(
-            text = tokenManager.getTokenCount().toString(),
+            text = tokenCountOut.value.toString(),
         )
     }
 }

@@ -133,7 +133,7 @@ class MainActivity : ComponentActivity() {
 
                         LaunchedEffect(key1 = Unit) {
                             if(googleAuthUiClient.getSignedInUser() != null) {
-                                navController.navigate("profile")
+                                navController.navigate("main_screen")
                             }
                         }
 
@@ -159,7 +159,7 @@ class MainActivity : ComponentActivity() {
                                     Toast.LENGTH_LONG
                                 ).show()
 
-                                navController.navigate("profile")
+                                navController.navigate("main_screen")
                                 viewModel.resetState()
                             }
                         }
@@ -176,6 +176,16 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         )
+                    }
+                    composable("main_screen") {
+                        MainScreen {
+                            navController.navigate("buy_token_screen")
+                        }
+                    }
+                    composable("buy_token_screen") {
+                        BuyTokenScreen(onCLick = { context, id ->
+                            purchaseProduct(context, id)
+                        })
                     }
                     composable("profile") {
                         ProfileScreen(

@@ -41,7 +41,9 @@ class TokenManager {
                     val tokenCount = documentSnapshot.getLong("tokenCount")
                     callback(tokenCount)
                 } else {
-                    callback(null)
+                    val initialTokenCount : Long = 80
+                    putToken(initialTokenCount)
+                    callback(initialTokenCount)
                 }
             }
             .addOnFailureListener { e ->
@@ -51,6 +53,7 @@ class TokenManager {
     }
 
     fun getTokenCount(): Long? {
+        Log.i("qwertyuiop", "qwedfr")
         var tokenCount: Long? = null
         try {
             val userDocRef = db.collection("users").document(user?.uid ?: "")
@@ -69,6 +72,7 @@ class TokenManager {
         } catch(e: Exception) {
             return null
         }
+        Log.i("qwertyuiop", tokenCount.toString())
         return tokenCount
     }
 }
