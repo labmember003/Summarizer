@@ -174,28 +174,28 @@ class MainActivity : ComponentActivity() {
             }
         })
 
-//        setContent {
-//            GoogleSignInCard()
-//        }
-
         setContent {
-            when (currentPage.value) {
-                PAGES.WALKTHROUGH -> {
-                    WalkThroughScreen()
-                }
-                PAGES.LOGIN -> {
-                    LoginScreen()
-                }
-                PAGES.MAINPAGE -> {
-                    MainScreen()
-                }
-                PAGES.BUYTOKEN -> {
-                    BuyTokenScreen { context, id ->
-                        purchaseProduct(context, id)
-                    }
-                }
-            }
+            GoogleSignInMainScreen()
         }
+
+//        setContent {
+//            when (currentPage.value) {
+//                PAGES.WALKTHROUGH -> {
+//                    WalkThroughScreen()
+//                }
+//                PAGES.LOGIN -> {
+//                    LoginScreen()
+//                }
+//                PAGES.MAINPAGE -> {
+//                    MainScreen()
+//                }
+//                PAGES.BUYTOKEN -> {
+//                    BuyTokenScreen { context, id ->
+//                        purchaseProduct(context, id)
+//                    }
+//                }
+//            }
+//        }
     }
 
     private fun purchaseProduct(context: Context, productId: String) {
@@ -298,10 +298,6 @@ class MainActivity : ComponentActivity() {
 
 }
 
-
-
-
-
 enum class PAGES {
     LOGIN, WALKTHROUGH, MAINPAGE, BUYTOKEN
 }
@@ -362,7 +358,7 @@ fun EditText(text: String, visualTransformation: VisualTransformation = VisualTr
 }
 
 
-@Preview(showBackground = true)
+
 @Composable
 fun GoogleSignInCard() {
     Card(
@@ -391,5 +387,18 @@ fun GoogleSignInCard() {
                 color = Color.Black
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GoogleSignInMainScreen() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.padding(32.dp))
+        LottieAnimation(R.raw.upload)
+        GoogleSignInCard()
     }
 }
