@@ -6,13 +6,20 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,8 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
@@ -39,6 +51,16 @@ import com.example.summarizer.DataManager.currentPage
 import com.example.summarizer.presentation.sign_in.GoogleAuthUiClient
 import com.falcon.summarizer.R
 import com.google.android.gms.auth.api.identity.Identity
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Card
+import androidx.compose.material.Text
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
     private val googleAuthUiClient by lazy {
@@ -153,8 +175,9 @@ class MainActivity : ComponentActivity() {
         })
 
 //        setContent {
-//            Test()
+//            GoogleSignInCard()
 //        }
+
         setContent {
             when (currentPage.value) {
                 PAGES.WALKTHROUGH -> {
@@ -175,12 +198,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    fun LoginWithGoogle() {
-            // A surface container using the 'background' color from the theme
-
-
-    }
     private fun purchaseProduct(context: Context, productId: String) {
         val skuDetailsParams = SkuDetailsParams.newBuilder()
             .setSkusList(listOf(productId))
@@ -252,31 +269,31 @@ class MainActivity : ComponentActivity() {
 //        editor.putString(USER_TOKEN, tokens.toString())
 //        editor.apply()
     }
-    @Composable
-    fun Test() {
-        val context = LocalContext.current
-//        sharedPreferences = remember {
-//            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+//    @Composable
+//    fun Test() {
+//        val context = LocalContext.current
+////        sharedPreferences = remember {
+////            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+////        }
+//
+//        Row {
+//            Button(onClick = {
+//                purchaseProduct(context, "100_coins_id")
+//            }) {
+//                Text(text = "button1")
+//            }
+//            Button(onClick = {
+//                purchaseProduct(context, "250_coins_id")
+//            }) {
+//                Text(text = "button2")
+//            }
+//            Button(onClick = {
+//                purchaseProduct(context, "500_coins_id")
+//            }) {
+//                Text(text = "button3")
+//            }
 //        }
-
-        Row {
-            Button(onClick = {
-                purchaseProduct(context, "100_coins_id")
-            }) {
-                Text(text = "button1")
-            }
-            Button(onClick = {
-                purchaseProduct(context, "250_coins_id")
-            }) {
-                Text(text = "button2")
-            }
-            Button(onClick = {
-                purchaseProduct(context, "500_coins_id")
-            }) {
-                Text(text = "button3")
-            }
-        }
-    }
+//    }
 
 
 }
@@ -342,4 +359,37 @@ fun EditText(text: String, visualTransformation: VisualTransformation = VisualTr
         modifier = Modifier.padding(16.dp),
         visualTransformation = visualTransformation
     )
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun GoogleSignInCard() {
+    Card(
+        modifier = Modifier
+            .padding(15.dp)
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(20.dp))
+            .fillMaxWidth(),
+        backgroundColor = Color.White
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(18.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painterResource(id = R.drawable.ic_goole),
+                modifier = Modifier.size(20.dp),
+                contentDescription = null
+            )
+            Text(
+                modifier = Modifier.padding(start = 10.dp),
+                text = "Continue With Google",
+                fontSize = 14.sp,
+                color = Color.Black
+            )
+        }
+    }
 }
