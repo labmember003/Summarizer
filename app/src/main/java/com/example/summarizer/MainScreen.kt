@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -49,7 +50,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -73,13 +73,26 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import java.io.IOException
 
+import androidx.compose.material.DrawerState
+import androidx.compose.material.DrawerValue
+import androidx.compose.material.ModalDrawer
+import androidx.compose.material.rememberDrawerState
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(
     onTokenCountClick: () -> Unit
 ) {
-    val tokenManager = TokenManager()
+    ModalDrawerSample(onTokenCountClick)
 
+}
+
+@Composable
+fun MainScreenPage(
+    onTokenCountClick: () -> Unit,
+    drawerState: DrawerState
+) {
+    val tokenManager = TokenManager()
     val context = LocalContext.current
     val modalSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -122,9 +135,49 @@ fun MainScreen(
         MainScreenContent(
             modalSheetState = modalSheetState,
             tokenManager = tokenManager,
-            onTokenCountClick = onTokenCountClick
+            onTokenCountClick = onTokenCountClick,
+            drawerState = drawerState
         )
     }
+}
+@Composable
+fun ModalDrawerSample(
+    onTokenCountClick: () -> Unit
+) {
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            Column {
+                Text("Text in Drawer")
+                Button(onClick = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                }) {
+                    Text("Close Drawer")
+                }
+            }
+
+        },
+        content = {
+//            Column {
+//                Text("Text in Bodycontext")
+//                Button(onClick = {
+//
+//                    scope.launch {
+//                        drawerState.open()
+//                    }
+//
+//                }) {
+//                    Text("Click to open")
+//                }
+//            }
+            MainScreenPage(onTokenCountClick, drawerState)
+        }
+    )
 }
 
 fun getResponseFromApi(prompt: String) {
@@ -162,7 +215,8 @@ fun getResponseFromApi(prompt: String) {
 private fun MainScreenContent(
     modalSheetState: ModalBottomSheetState,
     tokenManager: TokenManager,
-    onTokenCountClick: () -> Unit
+    onTokenCountClick: () -> Unit,
+    drawerState: DrawerState
 ) {
     val scope = rememberCoroutineScope()
     Column(
@@ -182,6 +236,15 @@ private fun MainScreenContent(
                     .padding(top = 16.dp)
                     .fillMaxWidth(1f)
             ) {
+                Text(
+                    text = "OPEN DRAWER",
+                    modifier = Modifier
+                        .clickable {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                )
                 Text(
                     text = "Upload Image Or E-Book",
                     modifier = Modifier
