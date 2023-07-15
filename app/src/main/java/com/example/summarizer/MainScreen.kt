@@ -17,15 +17,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -76,14 +76,21 @@ import java.io.IOException
 import androidx.compose.material.DrawerState
 import androidx.compose.material.DrawerValue
 import androidx.compose.material.ModalDrawer
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.rememberDrawerState
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(
-    onTokenCountClick: () -> Unit
+    onTokenCountClick: () -> Unit,
+    handleProfileButtonClickInNavigationDrawer: () -> Unit,
+    handleSettingsButtonClickInNavigationDrawer: () -> Unit
 ) {
-    ModalDrawerSample(onTokenCountClick)
+    ModalDrawerSample(onTokenCountClick, handleProfileButtonClickInNavigationDrawer, handleSettingsButtonClickInNavigationDrawer)
 
 }
 
@@ -142,7 +149,9 @@ fun MainScreenPage(
 }
 @Composable
 fun ModalDrawerSample(
-    onTokenCountClick: () -> Unit
+    onTokenCountClick: () -> Unit,
+    handleProfileButtonClickInNavigationDrawer: () -> Unit,
+    handleSettingsButtonClickInNavigationDrawer: () -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -150,34 +159,63 @@ fun ModalDrawerSample(
     ModalDrawer(
         drawerState = drawerState,
         drawerContent = {
-            Column {
-                Text("Text in Drawer")
-                Button(onClick = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                }) {
-                    Text("Close Drawer")
-                }
-            }
+//            Column {
+//                Text("Text in Drawer")
+//                Button(onClick = {
+//                    scope.launch {
+//                        drawerState.close()
+//                    }
+//                }) {
+//                    Text("Close Drawer")
+//                }
+//            }
+            DrawerContent(handleProfileButtonClickInNavigationDrawer, handleSettingsButtonClickInNavigationDrawer)
 
         },
         content = {
-//            Column {
-//                Text("Text in Bodycontext")
-//                Button(onClick = {
-//
-//                    scope.launch {
-//                        drawerState.open()
-//                    }
-//
-//                }) {
-//                    Text("Click to open")
-//                }
-//            }
             MainScreenPage(onTokenCountClick, drawerState)
         }
     )
+}
+@Composable
+fun DrawerContent(
+    handleProfileButtonClickInNavigationDrawer: () -> Unit,
+    handleSettingsButtonClickInNavigationDrawer: () -> Unit
+) {
+//    val navController = rememberNavController()
+//    NavHost(navController = navController, )
+
+    Column() {
+        Image(painter = painterResource(id = R.drawable.ad), contentDescription = "App Icon")
+        Spacer(modifier = Modifier.height(2.dp))
+        NavDrawerContent("Profile", Icons.Default.Person) {
+            handleProfileButtonClickInNavigationDrawer()
+        }
+        Spacer(modifier = Modifier.height(2.dp))
+        NavDrawerContent("Settings", Icons.Default.Settings) {
+            handleSettingsButtonClickInNavigationDrawer()
+        }
+    }
+}
+
+@Composable
+fun NavDrawerContent(contentName: String, icon: ImageVector, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            }
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentName,
+            tint = Color.Black
+        )
+        Text(text = contentName)
+    }
 }
 
 fun getResponseFromApi(prompt: String) {
@@ -231,28 +269,25 @@ private fun MainScreenContent(
             modifier = Modifier
                 .weight(0.5f)
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .fillMaxWidth(1f)
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "OPEN DRAWER",
-                    modifier = Modifier
-                        .clickable {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }
-                )
+                IconButton(onClick = {
+                    scope.launch {
+                        drawerState.open()
+                    }
+                }) {
+                    Icon(Icons.Filled.Menu, contentDescription = "Open Drawer")
+                }
                 Text(
                     text = "Upload Image Or E-Book",
                     modifier = Modifier
-                        .align(Alignment.Center)
                 )
                 Tokens(
                     Modifier
-                        .align(Alignment.CenterEnd)
                         .clip(RoundedCornerShape(8.dp))
                         .background(colorResource(id = R.color.light_grey))
                         .padding(8.dp),
