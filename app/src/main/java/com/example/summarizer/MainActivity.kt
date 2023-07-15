@@ -164,6 +164,8 @@ class MainActivity : ComponentActivity() {
                     composable("buy_token_screen") {
                         BuyTokenScreen(onCLick = { context, id ->
                             purchaseProduct(context, id)
+                        }, onDismiss = {
+                            navController.popBackStack()
                         })
                     }
                     composable("profile") {

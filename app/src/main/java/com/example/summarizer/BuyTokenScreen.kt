@@ -52,6 +52,7 @@ val FontName = FontFamily(
 @Composable
 fun BuyTokenScreen(
     onCLick: (Context, String) -> Unit,
+    onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     Box(
@@ -81,7 +82,7 @@ fun BuyTokenScreen(
                     .fillMaxWidth()
                     .padding(5.dp)
             ) {
-                Heading()
+                Heading(onDismiss)
                 Features()
                 Spacer(
                     modifier = Modifier
@@ -195,7 +196,7 @@ fun Feature(imageId: ImageVector, text: String, extraText: String) {
 }
 
 @Composable
-private fun Heading() {
+private fun Heading(onDismiss: () -> Unit) {
     Box(
         modifier = Modifier
             .padding(24.dp)
@@ -216,7 +217,7 @@ private fun Heading() {
                 .align(Alignment.CenterEnd)
                 .background(Color.LightGray, shape = CircleShape)
                 .clickable(onClick = {
-//                        TODO()
+                    onDismiss()
                 }),
             contentAlignment = Alignment.Center
         ) {
@@ -225,7 +226,7 @@ private fun Heading() {
                 contentDescription = "Close",
                 modifier = Modifier
                     .clickable {
-//                        onDismiss()
+                        onDismiss()
                     }
             )
         }
