@@ -4,8 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
+import android.content.Intent
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DrawerState
-import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
@@ -29,7 +27,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,25 +40,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.summarizer.Utils.FONT_SIZE
-import com.falcon.summarizer.R
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterialApi::class)
 @Preview(showBackground = true)
@@ -175,10 +164,10 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState) {
             trailingIcon = {
                 val context = LocalContext.current
                 val clipboardManager = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                Row(
+                Column(
 //                TODO("UPAR KAISE LAU ISSE?)
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.Start,
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.Start,
 //                    modifier = Modifier
 //                        .clickable {
 //                            clipboardManager.setPrimaryClip(ClipData.newPlainText("Copied Text", content.value))
@@ -191,6 +180,26 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState) {
                         modifier = Modifier
                             .clickable {
                                 clipboardManager.setPrimaryClip(ClipData.newPlainText("Copied Text", content.value))
+                            }
+                    )
+                    Spacer(modifier = Modifier.size(20.dp))
+                    Icon(
+                        imageVector = Icons.Filled.Download,
+                        contentDescription = "Email",
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .clickable {
+                                downloadTextPdf(content.value, context)
+                            }
+                    )
+                    Spacer(modifier = Modifier.size(20.dp))
+                    Icon(
+                        imageVector = Icons.Filled.Share,
+                        contentDescription = "Email",
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .clickable {
+                                shareText(content.value, context)
                             }
                     )
                 }
@@ -212,32 +221,25 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState) {
 
 }
 
-
-@Preview(showSystemUi = true)
-@Composable
-fun BeautifulTextViewWithOutline(text: String = "sex") {
-    Box(
-        modifier = Modifier
-            .background(
-                color = Color.White,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(16.dp)
-    ) {
-        OutlinedTextField(
-            value = text,
-            onValueChange = { /* Handle value change */ },
-            modifier = Modifier.padding(16.dp),
-            textStyle = MaterialTheme.typography.h4.copy(
-                color = Color.Black,
-            ),
-            shape = RoundedCornerShape(16.dp),
-            colors = androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Blue, // Customize focused border color
-                unfocusedBorderColor = Color.Gray, // Customize unfocused border color
-            )
-        )
+fun shareText(value: String, context: Context) {
+    val intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, value)
+        type = "text/plain"
     }
+    val chooserIntent = Intent.createChooser(intent, null).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    val startActivity = { intent: Intent ->
+        context.startActivity(intent)
+    }
+    startActivity.invoke(chooserIntent)
+}
+
+
+
+fun downloadTextPdf(content: String, context: Context) {
+    convertTextToPdfAndSave(context, content)
 }
 
 

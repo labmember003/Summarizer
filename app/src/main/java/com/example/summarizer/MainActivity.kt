@@ -154,8 +154,8 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("profile")
                             }
                         ) {
-//                            navController.navigate("settings")
-                            navController.navigate("summarized_page")
+                            navController.navigate("settings")
+//                            navController.navigate("summarized_page")
 
                         }
                     }
