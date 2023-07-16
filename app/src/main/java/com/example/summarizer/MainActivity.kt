@@ -75,7 +75,6 @@ class MainActivity : ComponentActivity() {
             oneTapClient = Identity.getSignInClient(applicationContext)
         )
     }
-//    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var billingClient: BillingClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -159,7 +158,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable("settings") {
-                        SettingsPage()
+                        SettingsScreen()
                     }
                     composable("buy_token_screen") {
                         BuyTokenScreen(onCLick = { context, id ->
@@ -209,29 +208,6 @@ class MainActivity : ComponentActivity() {
                 // Handle billing service disconnection
             }
         })
-
-//        setContent {
-//            GoogleSignInMainScreen()
-//        }
-
-//        setContent {
-//            when (currentPage.value) {
-//                PAGES.WALKTHROUGH -> {
-//                    WalkThroughScreen()
-//                }
-//                PAGES.LOGIN -> {
-//                    LoginScreen()
-//                }
-//                PAGES.MAINPAGE -> {
-//                    MainScreen()
-//                }
-//                PAGES.BUYTOKEN -> {
-//                    BuyTokenScreen { context, id ->
-//                        purchaseProduct(context, id)
-//                    }
-//                }
-//            }
-//        }
     }
 
     private fun purchaseProduct(context: Context, productId: String) {
@@ -344,10 +320,6 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@Composable
-fun SettingsPage() {
-    TODO("Implement It")
-}
 
 enum class PAGES {
     LOGIN, WALKTHROUGH, MAINPAGE, BUYTOKEN
