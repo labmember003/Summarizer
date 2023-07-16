@@ -1,6 +1,9 @@
 package com.example.summarizer
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
+import android.content.Context.CLIPBOARD_SERVICE
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -48,6 +51,17 @@ import androidx.compose.ui.unit.sp
 import com.example.summarizer.Utils.FONT_SIZE
 import com.falcon.summarizer.R
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterialApi::class)
 @Preview(showBackground = true)
@@ -156,10 +170,76 @@ fun FontSizeSection(selectedFontSize: Int, onFontSizeSelected: (Int) -> Unit) {
 fun SummarizedPageContent(modalSheetState: ModalBottomSheetState) {
     Column() {
         HeadingSummarizedPage(modalSheetState)
+        val content = remember { mutableStateOf("orem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets") }
+        OutlinedTextField(
+            trailingIcon = {
+                val context = LocalContext.current
+                val clipboardManager = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                Row(
+//                TODO("UPAR KAISE LAU ISSE?)
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.Start,
+//                    modifier = Modifier
+//                        .clickable {
+//                            clipboardManager.setPrimaryClip(ClipData.newPlainText("Copied Text", content.value))
+//                        }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ContentCopy,
+                        contentDescription = "Email",
+                        tint = Color.Gray,
+                        modifier = Modifier
+                            .clickable {
+                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Copied Text", content.value))
+                            }
+                    )
+                }
 
+            },
+            value = content.value,
+            readOnly = true,
+            enabled = true,
+            onValueChange = {
+
+            },
+            label = { Text("Summarized Text") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            visualTransformation = VisualTransformation.None
+        )
     }
 
 }
+
+
+@Preview(showSystemUi = true)
+@Composable
+fun BeautifulTextViewWithOutline(text: String = "sex") {
+    Box(
+        modifier = Modifier
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(16.dp)
+    ) {
+        OutlinedTextField(
+            value = text,
+            onValueChange = { /* Handle value change */ },
+            modifier = Modifier.padding(16.dp),
+            textStyle = MaterialTheme.typography.h4.copy(
+                color = Color.Black,
+            ),
+            shape = RoundedCornerShape(16.dp),
+            colors = androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Blue, // Customize focused border color
+                unfocusedBorderColor = Color.Gray, // Customize unfocused border color
+            )
+        )
+    }
+}
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
