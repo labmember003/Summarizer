@@ -1,5 +1,7 @@
 package com.example.summarizer
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,11 +39,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.summarizer.Utils.FONT_SIZE
 import com.falcon.summarizer.R
 import kotlinx.coroutines.launch
 
@@ -71,6 +75,7 @@ fun SummarizedPage() {
 @Composable
 fun BottomSheetFontSize(modalSheetState: ModalBottomSheetState) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,9 +104,18 @@ fun BottomSheetFontSize(modalSheetState: ModalBottomSheetState) {
                     }
             )
         }
-        var selectedFontSize by remember { mutableStateOf(16) }
+        val sharedPreferences = remember {
+            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+        }
+        val fontSize = sharedPreferences.getInt(FONT_SIZE, 16)
+        var selectedFontSize by remember { mutableStateOf(fontSize) }
+        val editor = sharedPreferences.edit()
         FontSizeSection(selectedFontSize) { fontSize ->
             selectedFontSize = fontSize
+            editor.putInt(FONT_SIZE, fontSize)
+            editor.apply()
+            Log.i("meoemoeoeoeoeoeoe", fontSize.toString())
+            Log.i("meoemoeoeoeoeoeoe", sharedPreferences.getInt(FONT_SIZE, 16).toString())
         }
     }
 }
@@ -140,30 +154,37 @@ fun FontSizeSection(selectedFontSize: Int, onFontSizeSelected: (Int) -> Unit) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SummarizedPageContent(modalSheetState: ModalBottomSheetState) {
+    Column() {
+        HeadingSummarizedPage(modalSheetState)
+
+    }
+
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun HeadingSummarizedPage(modalSheetState: ModalBottomSheetState) {
     val scope = rememberCoroutineScope()
-    Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(22.dp)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = "Summarizer",
-                style = MaterialTheme.typography.subtitle1,
-                fontSize = 20.sp
+        Text(
+            text = "Summarizer",
+            style = MaterialTheme.typography.subtitle1,
+            fontSize = 20.sp
+        )
+        IconButton(onClick = {
+            scope.launch { modalSheetState.show() }
+        }) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "Options"
             )
-            IconButton(onClick = {
-                scope.launch { modalSheetState.show() }
-            }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Options"
-                )
-            }
         }
     }
+
 }
