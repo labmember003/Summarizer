@@ -33,9 +33,6 @@ fun SettingsScreen() {
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(22.dp)
             ) {
-                FontSizeSection(selectedFontSize) { fontSize ->
-                    selectedFontSize = fontSize
-                }
                 PrivacyPolicySection()
                 ResourcesUsedSection()
             }
@@ -43,41 +40,7 @@ fun SettingsScreen() {
     )
 }
 
-@Composable
-fun FontSizeSection(selectedFontSize: Int, onFontSizeSelected: (Int) -> Unit) {
-    Column {
-        Text(
-            text = "Font Size",
-            style = MaterialTheme.typography.subtitle1,
-            fontSize = 20.sp
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            (12..20).forEach { fontSize ->
-                val isSelected = fontSize == selectedFontSize
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .padding(end = 8.dp)
-                        .clickable { onFontSizeSelected(fontSize) }
-                        .background(
-                            color = if (isSelected) MaterialTheme.colors.primary else Color.Transparent,
-                            shape = MaterialTheme.shapes.medium
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = fontSize.toString(),
-                        style = TextStyle(fontSize = fontSize.sp, color = if (isSelected) Color.White else Color.Black)
-                    )
-                }
-            }
-        }
-    }
-}
+
 
 @Composable
 fun PrivacyPolicySection() {

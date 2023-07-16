@@ -155,6 +155,8 @@ class MainActivity : ComponentActivity() {
                             }
                         ) {
                             navController.navigate("settings")
+//                            navController.navigate("summarized_page")
+
                         }
                     }
                     composable("settings") {
@@ -183,6 +185,9 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         )
+                    }
+                    composable("summarized_page") {
+                        SummarizedPage()
                     }
                 }
             }
