@@ -2,6 +2,7 @@ package com.example.summarizer
 
 import android.content.Context
 import android.os.Environment
+import android.widget.Toast
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.pdmodel.PDPage
@@ -21,7 +22,6 @@ fun convertTextToPdfAndSave(context: Context, text: String) {
     val contentStream = PDPageContentStream(document, page)
 
     val margin = 25f
-    val startX = margin
     val startY = page.mediaBox.height - margin
     val contentWidth = page.mediaBox.width - 2 * margin
     val fontSize = 12f
@@ -29,7 +29,7 @@ fun convertTextToPdfAndSave(context: Context, text: String) {
 
     contentStream.beginText()
     contentStream.setFont(PDType1Font.HELVETICA_BOLD, fontSize)
-    contentStream.newLineAtOffset(startX, startY)
+    contentStream.newLineAtOffset(margin, startY)
 
     val lines = text.split("\n")
     for (line in lines) {
@@ -57,6 +57,7 @@ fun convertTextToPdfAndSave(context: Context, text: String) {
 
     FileOutputStream(pdfFile).use { outputStream ->
         document.save(outputStream)
+        Toast.makeText(context, "File Saved In Downloads", Toast.LENGTH_SHORT).show()
     }
 
     document.close()
