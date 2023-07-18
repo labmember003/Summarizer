@@ -17,14 +17,17 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -75,12 +78,15 @@ import java.io.IOException
 
 import androidx.compose.material.DrawerState
 import androidx.compose.material.DrawerValue
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material.ModalDrawer
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material3.IconButton
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -303,17 +309,47 @@ private fun MainScreenContent(
             LineWithText()
         }
         val content = remember { mutableStateOf("") }
-        OutlinedTextField(
-            value = content.value,
-            onValueChange = {
-                content.value = it
-            },
-            label = { androidx.compose.material.Text("Input Text Here To Summarize") },
+        var isVisible by remember { mutableStateOf(false) }
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
                 .weight(0.5f)
-        )
+        ) {
+            OutlinedTextField(
+                value = content.value,
+                onValueChange = {
+                    if (it.length > 6) {
+                        isVisible = true
+                    } else if (it.length < 6) {
+                        isVisible = false
+                    }
+                    content.value = it
+                },
+                label = { androidx.compose.material.Text("Input Text Here To Summarize") },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            )
+            if (isVisible) {
+                FloatingActionButton(
+                    onClick = {
+//                        content.value ke saath navigation krna hai
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(24.dp)
+                        .size(56.dp),
+                    shape = RoundedCornerShape(percent = 30),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.NavigateNext,
+                        contentDescription = "Go",
+                        tint = MaterialTheme.colors.primary,
+                    )
+                }
+            }
+
+        }
     }
 }
 
