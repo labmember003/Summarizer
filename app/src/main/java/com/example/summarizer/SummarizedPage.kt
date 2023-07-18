@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Context.CLIPBOARD_SERVICE
 import android.content.Intent
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,6 +51,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.input.VisualTransformation
@@ -169,7 +171,20 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState) {
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     }
-    val fontSize = remember { mutableStateOf(sharedPreferences.getInt(FONT_SIZE, 16)) }
+    val fontSizeState = remember { mutableStateOf(sharedPreferences.getInt(FONT_SIZE, 16)) }
+    DisposableEffect(Unit) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == FONT_SIZE) {
+                fontSizeState.value = sharedPreferences.getInt(FONT_SIZE, 16)
+            }
+        }
+        sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+
+        onDispose {
+            sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
     Column() {
         HeadingSummarizedPage(modalSheetState)
         val content = remember { mutableStateOf("orem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets") }
@@ -230,7 +245,7 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState) {
                 .padding(16.dp),
             visualTransformation = VisualTransformation.None,
             textStyle = TextStyle(
-                fontSize = fontSize.value.sp
+                fontSize = fontSizeState.value.sp
             )
         )
     }
