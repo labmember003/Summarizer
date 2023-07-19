@@ -57,9 +57,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.summarizer.presentation.profile.ProfileScreen
 import com.example.summarizer.presentation.sign_in.SignInScreen
 import com.example.summarizer.presentation.sign_in.SignInViewModel
@@ -153,10 +155,12 @@ class MainActivity : ComponentActivity() {
                         }, {
                                 navController.navigate("profile")
                             }
-                        ) {
-//                            navController.navigate("settings")
-                            navController.navigate("summarized_page")
+                        , {
+                            navController.navigate("settings")
+//                            navController.navigate("summarized_page")
 
+                        }) { text ->
+                            navController.navigate("summarized_page/$text")
                         }
                     }
                     composable("settings") {
@@ -186,8 +190,16 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-                    composable("summarized_page") {
-                        SummarizedPage()
+                    composable(
+                        "summarized_page" + "/{summarizedText}",
+                        arguments = listOf(
+                            navArgument("summarizedText") {
+                                 type = NavType.StringType
+                                nullable = false
+                            }
+                        )
+                    ) {  entry ->
+                        SummarizedPage(summarizedText = entry.arguments?.getString("summarizedText"))
                     }
                 }
             }

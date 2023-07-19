@@ -42,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.summarizer.Utils.FONT_SIZE
@@ -52,20 +51,12 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalMaterialApi::class)
-@Preview(showBackground = true)
 @Composable
-fun SummarizedPage() {
+fun SummarizedPage(summarizedText: String?) {
+    Log.i("arguementPASSING", summarizedText.toString())
     val modalSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded },
@@ -78,7 +69,7 @@ fun SummarizedPage() {
             BottomSheetFontSize(modalSheetState)
         }
     ) {
-        SummarizedPageContent(modalSheetState)
+        SummarizedPageContent(modalSheetState, summarizedText = summarizedText.toString())
     }
 
 
@@ -166,7 +157,7 @@ fun FontSizeSection(selectedFontSize: Int, onFontSizeSelected: (Int) -> Unit) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SummarizedPageContent(modalSheetState: ModalBottomSheetState) {
+fun SummarizedPageContent(modalSheetState: ModalBottomSheetState, summarizedText: String) {
     val context = LocalContext.current
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
@@ -187,7 +178,8 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState) {
 
     Column() {
         HeadingSummarizedPage(modalSheetState)
-        val content = remember { mutableStateOf("orem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets") }
+        val content = remember { mutableStateOf(summarizedText) }
+
         OutlinedTextField(
             trailingIcon = {
                 val context = LocalContext.current

@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -68,7 +67,6 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -88,22 +86,25 @@ import androidx.compose.material.rememberDrawerState
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(
     onTokenCountClick: () -> Unit,
     handleProfileButtonClickInNavigationDrawer: () -> Unit,
-    handleSettingsButtonClickInNavigationDrawer: () -> Unit
+    handleSettingsButtonClickInNavigationDrawer: () -> Unit,
+    handleNavigtionFromMainScreenToSummarizedPage: (String) -> Unit
 ) {
-    ModalDrawerSample(onTokenCountClick, handleProfileButtonClickInNavigationDrawer, handleSettingsButtonClickInNavigationDrawer)
+    ModalDrawerSample(onTokenCountClick, handleProfileButtonClickInNavigationDrawer, handleSettingsButtonClickInNavigationDrawer, handleNavigtionFromMainScreenToSummarizedPage)
 
 }
 
 @Composable
 fun MainScreenPage(
     onTokenCountClick: () -> Unit,
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    handleNavigtionFromMainScreenToSummarizedPage: (String) -> Unit
 ) {
     val tokenManager = TokenManager()
     val context = LocalContext.current
@@ -120,14 +121,16 @@ fun MainScreenPage(
             val text = extractTextFromPdf(uri, context)
             Log.i("hapyhapyhapy", "text")
             Log.i("hapyhapyhapy", text)
-            getResponseFromApi(text)
+            val summarizedText = getResponseFromApi(text)
+            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
         }
     }
     val launcher2 = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             val bitmap: Bitmap = uriToBitmap(context, it)
             val text = getTextFromImage(bitmap, recognizer, context)
-            getResponseFromApi(text)
+            val summarizedText = getResponseFromApi(text)
+            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
         }
     }
     ModalBottomSheetLayout(
@@ -149,7 +152,8 @@ fun MainScreenPage(
             modalSheetState = modalSheetState,
             tokenManager = tokenManager,
             onTokenCountClick = onTokenCountClick,
-            drawerState = drawerState
+            drawerState = drawerState,
+            handleNavigtionFromMainScreenToSummarizedPage = handleNavigtionFromMainScreenToSummarizedPage
         )
     }
 }
@@ -157,7 +161,8 @@ fun MainScreenPage(
 fun ModalDrawerSample(
     onTokenCountClick: () -> Unit,
     handleProfileButtonClickInNavigationDrawer: () -> Unit,
-    handleSettingsButtonClickInNavigationDrawer: () -> Unit
+    handleSettingsButtonClickInNavigationDrawer: () -> Unit,
+    handleNavigtionFromMainScreenToSummarizedPage: (String) -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -179,7 +184,7 @@ fun ModalDrawerSample(
 
         },
         content = {
-            MainScreenPage(onTokenCountClick, drawerState)
+            MainScreenPage(onTokenCountClick, drawerState, handleNavigtionFromMainScreenToSummarizedPage)
         }
     )
 }
@@ -224,7 +229,7 @@ fun NavDrawerContent(contentName: String, icon: ImageVector, onClick: () -> Unit
     }
 }
 
-fun getResponseFromApi(prompt: String) {
+fun getResponseFromApi(prompt: String): String {
     val requestBody = RequestBody.create(
         "application/json".toMediaType(),
         Gson().toJson(
@@ -238,20 +243,23 @@ fun getResponseFromApi(prompt: String) {
     )
     val contentType = "application/json"
     val authorization = "Bearer ${Utils.API_KEY}"
-    CoroutineScope(Dispatchers.IO).launch {
+    var textResponse: String?
+    runBlocking(Dispatchers.IO) {
         try {
             val response = ApiUtilities.getApiInterface().getChat(
                 contentType, authorization, requestBody
             )
-            val textResponse = response.choices.first().text
-            Log.i("fownfpownf", textResponse)
+            textResponse = response.choices.first().text
+//            navigate to summarized page
+            Log.i("fownfpownf", textResponse!!)
         } catch (e : Exception){
-
+            textResponse = e.message.toString()
             withContext(Dispatchers.Main){
                 Log.i("errorWaliBilli", e.toString())
             }
         }
     }
+    return textResponse!!
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -260,7 +268,8 @@ private fun MainScreenContent(
     modalSheetState: ModalBottomSheetState,
     tokenManager: TokenManager,
     onTokenCountClick: () -> Unit,
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    handleNavigtionFromMainScreenToSummarizedPage: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     Column(
@@ -318,7 +327,7 @@ private fun MainScreenContent(
             OutlinedTextField(
                 value = content.value,
                 onValueChange = {
-                    if (it.length > 6) {
+                    if (it.length >= 6) {
                         isVisible = true
                     } else if (it.length < 6) {
                         isVisible = false
@@ -334,6 +343,8 @@ private fun MainScreenContent(
                 FloatingActionButton(
                     onClick = {
 //                        content.value ke saath navigation krna hai
+                        val summarizedText = getResponseFromApi(content.value)
+                        handleNavigtionFromMainScreenToSummarizedPage(summarizedText)
                     },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
