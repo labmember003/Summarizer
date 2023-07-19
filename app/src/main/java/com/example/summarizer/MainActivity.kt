@@ -443,7 +443,7 @@ fun GoogleSignInMainScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.padding(32.dp))
-        LottieAnimation(R.raw.upload)
+        LottieAnimation(R.raw.login_animation)
         GoogleSignInCard(onClick = onClick)
     }
 }
