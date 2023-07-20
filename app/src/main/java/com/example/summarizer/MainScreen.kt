@@ -82,6 +82,7 @@ import com.tom_roush.pdfbox.text.PDFTextStripper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
@@ -129,42 +130,54 @@ fun MainScreenPage(
             getResponseFromApi(
                 prompt = text,
                 onSuccess = { response ->
+                    Log.i("hapyhapyhapy - 1", response)
                     isLoading = false
-                    responseText = response
-                    handleNavigtionFromMainScreenToSummarizedPage(responseText)
+//                    responseText = response
+                    handleNavigtionFromMainScreenToSummarizedPage(response)
                     // Navigate to the summarized page here if needed
                     // You can use the responseText variable to pass the result
                 },
                 onError = { error ->
                     isLoading = false
+                    Log.i("hapyhapyhapy - 2", error)
+                    handleNavigtionFromMainScreenToSummarizedPage(error)
                     // Handle the error here if needed
                 }
             )
         }
     }
     var isLoading2 by remember { mutableStateOf(false) }
-    var responseText2 by remember { mutableStateOf("") }
+//    var extractedTextOut by remember { mutableStateOf("") }
     val launcher2 = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
+            isLoading2 = true
             val bitmap: Bitmap = uriToBitmap(context, it)
-            val text = getTextFromImage(bitmap, recognizer, context)
+//            val text = getTextFromImage(bitmap, recognizer, context, )
+            getTextFromImage(bitmap, recognizer, context) { extractedText ->
+//                extractedTextOut = extractedText
+                Log.i("hapyhapyhapy - text - in", extractedText)
+                Log.i("hapyhapyhapy - text", extractedText)
+                getResponseFromApi(
+                    prompt = extractedText,
+                    onSuccess = { response ->
+                        Log.i("hapyhapyhapy - 1", response)
+                        isLoading = false
+//                    responseText2 = response
+                        handleNavigtionFromMainScreenToSummarizedPage(response)
+                        // Navigate to the summarized page here if needed
+                        // You can use the responseText variable to pass the result
+                    },
+                    onError = { error ->
+                        isLoading = false
+                        Log.i("hapyhapyhapy - 2", error)
+                        handleNavigtionFromMainScreenToSummarizedPage(error)
+                        // Handle the error here if needed
+                    }
+                )
+            }
 //            val summarizedText = getResponseFromApi(text)
 //            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
-            isLoading2 = true
-            getResponseFromApi(
-                prompt = text,
-                onSuccess = { response ->
-                    isLoading = false
-                    responseText2 = response
-                    handleNavigtionFromMainScreenToSummarizedPage(responseText2)
-                    // Navigate to the summarized page here if needed
-                    // You can use the responseText variable to pass the result
-                },
-                onError = { error ->
-                    isLoading = false
-                    // Handle the error here if needed
-                }
-            )
+
         }
     }
     if (isLoading || isLoading2) {
@@ -314,7 +327,7 @@ fun getResponseFromApi(
             }
         } catch (e: Exception) {
             val errorResponse = e.message.toString()
-
+            Log.i("hapyhapyhapy", errorResponse)
             withContext(Dispatchers.Main) {
                 onError(errorResponse)
             }
@@ -428,6 +441,7 @@ private fun MainScreenContent(
                             getResponseFromApi(
                                 prompt = content.value,
                                 onSuccess = { response ->
+                                    Log.i("hapyhapyhapy", response)
                                     isLoading = false
                                     responseText = response
                                     handleNavigtionFromMainScreenToSummarizedPage(responseText)
@@ -436,6 +450,7 @@ private fun MainScreenContent(
                                 },
                                 onError = { error ->
                                     isLoading = false
+                                    Log.i("hapyhapyhapy", error)
                                     // Handle the error here if needed
                                 }
                             )
@@ -647,21 +662,42 @@ private fun extractTextFromPdf(uri: Uri, context: Context): String {
     return text
 }
 
-private fun getTextFromImage(bitmap: Bitmap, recognizer: TextRecognizer, context: Context): String {
-    var extractedText = ""
-    val image = bitmap.let {
-        InputImage.fromBitmap(it, 0)
-    }
-    image.let {
-        recognizer.process(it)
-            .addOnSuccessListener { visionText ->
-                Log.i("kaaali billi", visionText.text)
-                extractedText = visionText.text
-                Toast.makeText(context, visionText.text, Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-                extractedText = "Error - $e"
-            }
-    }
-    return extractedText
+//private fun getTextFromImage(bitmap: Bitmap, recognizer: TextRecognizer, context: Context): String {
+//    var extractedText = ""
+//    val image = bitmap.let {
+//        InputImage.fromBitmap(it, 0)
+//    }
+//    image.let {
+//        recognizer.process(it)
+//            .addOnSuccessListener { visionText ->
+//                Log.i("kaaali billi", visionText.text)
+//                extractedText = visionText.text
+//                Toast.makeText(context, visionText.text, Toast.LENGTH_SHORT).show()
+//            }
+//            .addOnFailureListener { e ->
+//                extractedText = "Error - $e"
+//            }
+//    }
+//    return extractedText
+//}
+
+private fun getTextFromImage(
+    bitmap: Bitmap,
+    recognizer: TextRecognizer,
+    context: Context,
+    callback: (String) -> Unit
+) {
+    val image = InputImage.fromBitmap(bitmap, 0)
+    recognizer.process(image)
+        .addOnSuccessListener { visionText ->
+            val extractedText = visionText.text
+            Log.i("kaaali billi", extractedText)
+            Toast.makeText(context, extractedText, Toast.LENGTH_SHORT).show()
+            callback(extractedText) // Pass the result to the callback function
+        }
+        .addOnFailureListener { e ->
+            val errorText = "Error - $e"
+            Log.e("kaaali billi", errorText)
+            callback(errorText) // Pass the error to the callback function
+        }
 }

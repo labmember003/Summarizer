@@ -440,10 +440,12 @@ fun GoogleSignInMainScreen(
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.padding(32.dp))
         LottieAnimation(R.raw.login_animation)
+        Spacer(modifier = Modifier.padding(32.dp))
         GoogleSignInCard(onClick = onClick)
     }
 }
