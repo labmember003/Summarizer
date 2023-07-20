@@ -28,26 +28,38 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DrawerState
+import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.ModalDrawer
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -67,6 +79,7 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,32 +87,19 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import java.io.IOException
 
-import androidx.compose.material.DrawerState
-import androidx.compose.material.DrawerValue
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material.ModalDrawer
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.NavigateNext
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.rememberDrawerState
-import androidx.compose.material3.IconButton
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
-import kotlinx.coroutines.runBlocking
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(
     onTokenCountClick: () -> Unit,
     handleProfileButtonClickInNavigationDrawer: () -> Unit,
     handleSettingsButtonClickInNavigationDrawer: () -> Unit,
-    handleNavigtionFromMainScreenToSummarizedPage: (String) -> Unit
+    handleNavigationFromMainScreenToSummarizedPage: (String) -> Unit
 ) {
-    ModalDrawerSample(onTokenCountClick, handleProfileButtonClickInNavigationDrawer, handleSettingsButtonClickInNavigationDrawer, handleNavigtionFromMainScreenToSummarizedPage)
+    ModalDrawerSample(onTokenCountClick, handleProfileButtonClickInNavigationDrawer, handleSettingsButtonClickInNavigationDrawer, handleNavigationFromMainScreenToSummarizedPage)
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreenPage(
     onTokenCountClick: () -> Unit,
@@ -116,45 +116,95 @@ fun MainScreenPage(
     val recognizer = remember {
         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     }
+    var isLoading by remember { mutableStateOf(false) }
+    var responseText by remember { mutableStateOf("") }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             val text = extractTextFromPdf(uri, context)
             Log.i("hapyhapyhapy", "text")
             Log.i("hapyhapyhapy", text)
-            val summarizedText = getResponseFromApi(text)
-            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
+//            val summarizedText = getResponseFromApi(text)
+//            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
+            isLoading = true
+            getResponseFromApi(
+                prompt = text,
+                onSuccess = { response ->
+                    isLoading = false
+                    responseText = response
+                    handleNavigtionFromMainScreenToSummarizedPage(responseText)
+                    // Navigate to the summarized page here if needed
+                    // You can use the responseText variable to pass the result
+                },
+                onError = { error ->
+                    isLoading = false
+                    // Handle the error here if needed
+                }
+            )
         }
     }
+    var isLoading2 by remember { mutableStateOf(false) }
+    var responseText2 by remember { mutableStateOf("") }
     val launcher2 = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             val bitmap: Bitmap = uriToBitmap(context, it)
             val text = getTextFromImage(bitmap, recognizer, context)
-            val summarizedText = getResponseFromApi(text)
-            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
-        }
-    }
-    ModalBottomSheetLayout(
-        sheetState = modalSheetState,
-        sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-        sheetContent = {
-            BottomSheet(
-                modalSheetState,
-                onPdfOptionClicked = {
-                    launcher.launch("application/pdf")
+//            val summarizedText = getResponseFromApi(text)
+//            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
+            isLoading2 = true
+            getResponseFromApi(
+                prompt = text,
+                onSuccess = { response ->
+                    isLoading = false
+                    responseText2 = response
+                    handleNavigtionFromMainScreenToSummarizedPage(responseText2)
+                    // Navigate to the summarized page here if needed
+                    // You can use the responseText variable to pass the result
                 },
-                onImageOptionClicked = {
-                    launcher2.launch("image/*")
+                onError = { error ->
+                    isLoading = false
+                    // Handle the error here if needed
                 }
             )
         }
-    ) {
-        MainScreenContent(
-            modalSheetState = modalSheetState,
-            tokenManager = tokenManager,
-            onTokenCountClick = onTokenCountClick,
-            drawerState = drawerState,
-            handleNavigtionFromMainScreenToSummarizedPage = handleNavigtionFromMainScreenToSummarizedPage
-        )
+    }
+    if (isLoading || isLoading2) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading_cats))
+            com.airbnb.lottie.compose.LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .size(400.dp)
+            )
+        }
+    } else if (!isLoading || !isLoading2){
+        ModalBottomSheetLayout(
+            sheetState = modalSheetState,
+            sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+            sheetContent = {
+                BottomSheet(
+                    modalSheetState,
+                    onPdfOptionClicked = {
+                        launcher.launch("application/pdf")
+                    },
+                    onImageOptionClicked = {
+                        launcher2.launch("image/*")
+                    }
+                )
+            }
+        ) {
+            MainScreenContent(
+                modalSheetState = modalSheetState,
+                tokenManager = tokenManager,
+                onTokenCountClick = onTokenCountClick,
+                drawerState = drawerState,
+                handleNavigtionFromMainScreenToSummarizedPage = handleNavigtionFromMainScreenToSummarizedPage
+            )
+        }
     }
 }
 @Composable
@@ -165,7 +215,7 @@ fun ModalDrawerSample(
     handleNavigtionFromMainScreenToSummarizedPage: (String) -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+    rememberCoroutineScope()
 
     ModalDrawer(
         drawerState = drawerState,
@@ -229,7 +279,15 @@ fun NavDrawerContent(contentName: String, icon: ImageVector, onClick: () -> Unit
     }
 }
 
-fun getResponseFromApi(prompt: String): String {
+
+
+// ...
+
+fun getResponseFromApi(
+    prompt: String,
+    onSuccess: (String) -> Unit,
+    onError: (String) -> Unit
+) {
     val requestBody = RequestBody.create(
         "application/json".toMediaType(),
         Gson().toJson(
@@ -243,24 +301,27 @@ fun getResponseFromApi(prompt: String): String {
     )
     val contentType = "application/json"
     val authorization = "Bearer ${Utils.API_KEY}"
-    var textResponse: String?
-    runBlocking(Dispatchers.IO) {
+
+    CoroutineScope(Dispatchers.IO).launch {
         try {
             val response = ApiUtilities.getApiInterface().getChat(
                 contentType, authorization, requestBody
             )
-            textResponse = response.choices.first().text
-//            navigate to summarized page
-            Log.i("fownfpownf", textResponse!!)
-        } catch (e : Exception){
-            textResponse = e.message.toString()
-            withContext(Dispatchers.Main){
-                Log.i("errorWaliBilli", e.toString())
+            val textResponse = response.choices.first().text
+
+            withContext(Dispatchers.Main) {
+                onSuccess(textResponse)
+            }
+        } catch (e: Exception) {
+            val errorResponse = e.message.toString()
+
+            withContext(Dispatchers.Main) {
+                onError(errorResponse)
             }
         }
     }
-    return textResponse!!
 }
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -272,94 +333,130 @@ private fun MainScreenContent(
     handleNavigtionFromMainScreenToSummarizedPage: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(4.dp)
-    ) {
+    var isLoading by remember { mutableStateOf(false) }
+    var responseText by remember { mutableStateOf("") }
+    if (isLoading) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading_cats))
+            com.airbnb.lottie.compose.LottieAnimation(
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .size(400.dp)
+            )
+        }
+    } else if (!isLoading){
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .weight(0.5f)
+                .padding(4.dp)
         ) {
-            Spacer(modifier = Modifier.height(2.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = {
-                    scope.launch {
-                        drawerState.open()
-                    }
-                }) {
-                    Icon(Icons.Filled.Menu, contentDescription = "Open Drawer")
-                }
-                Text(
-                    text = "Upload Image Or E-Book",
-                    modifier = Modifier
-                )
-                Tokens(
-                    Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(colorResource(id = R.color.light_grey))
-                        .padding(8.dp),
-                    tokenManager = tokenManager,
-                    onTokenCountClick = onTokenCountClick
-                )
-            }
-            UploadAnimation(
-                onClick = {
-                    scope.launch { modalSheetState.show() }
-                }
-            )
-            LineWithText()
-        }
-        val content = remember { mutableStateOf("") }
-        var isVisible by remember { mutableStateOf(false) }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.5f)
-        ) {
-            OutlinedTextField(
-                value = content.value,
-                onValueChange = {
-                    if (it.length >= 6) {
-                        isVisible = true
-                    } else if (it.length < 6) {
-                        isVisible = false
-                    }
-                    content.value = it
-                },
-                label = { androidx.compose.material.Text("Input Text Here To Summarize") },
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            )
-            if (isVisible) {
-                FloatingActionButton(
-                    onClick = {
-//                        content.value ke saath navigation krna hai
-                        val summarizedText = getResponseFromApi(content.value)
-                        handleNavigtionFromMainScreenToSummarizedPage(summarizedText)
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(24.dp)
-                        .size(56.dp),
-                    shape = RoundedCornerShape(percent = 30),
+                    .weight(0.5f)
+            ) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.NavigateNext,
-                        contentDescription = "Go",
-                        tint = MaterialTheme.colors.primary,
+                    IconButton(onClick = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }) {
+                        Icon(Icons.Filled.Menu, contentDescription = "Open Drawer")
+                    }
+                    Text(
+                        text = "Upload Image Or E-Book",
+                        modifier = Modifier
+                    )
+                    Tokens(
+                        Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(colorResource(id = R.color.light_grey))
+                            .padding(8.dp),
+                        tokenManager = tokenManager,
+                        onTokenCountClick = onTokenCountClick
                     )
                 }
+                UploadAnimation(
+                    onClick = {
+                        scope.launch { modalSheetState.show() }
+                    }
+                )
+                LineWithText()
             }
+            val content = remember { mutableStateOf("") }
+            var isVisible by remember { mutableStateOf(false) }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.5f)
+            ) {
+                OutlinedTextField(
+                    value = content.value,
+                    onValueChange = {
+                        if (it.length >= 6) {
+                            isVisible = true
+                        } else if (it.length < 6) {
+                            isVisible = false
+                        }
+                        content.value = it
+                    },
+                    label = { androidx.compose.material.Text("Input Text Here To Summarize") },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                )
+                if (isVisible) {
+                    FloatingActionButton(
+                        onClick = {
 
+//                        content.value ke saath navigation krna hai
+//                        val summarizedText = getResponseFromApi(content.value)
+//                        handleNavigtionFromMainScreenToSummarizedPage(summarizedText)
+                            isLoading = true
+                            getResponseFromApi(
+                                prompt = content.value,
+                                onSuccess = { response ->
+                                    isLoading = false
+                                    responseText = response
+                                    handleNavigtionFromMainScreenToSummarizedPage(responseText)
+                                    // Navigate to the summarized page here if needed
+                                    // You can use the responseText variable to pass the result
+                                },
+                                onError = { error ->
+                                    isLoading = false
+                                    // Handle the error here if needed
+                                }
+                            )
+
+
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp)
+                            .size(56.dp),
+                        shape = RoundedCornerShape(percent = 30),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.NavigateNext,
+                            contentDescription = "Go",
+                            tint = MaterialTheme.colors.primary,
+                        )
+                    }
+                }
+
+            }
         }
     }
 }
