@@ -41,34 +41,28 @@ android {
         kotlinCompilerExtensionVersion '1.4.0'
     }
     packagingOptions {
-//        resources.excludes.add("META-INF/*")
         resources {
-            excludes += '/META-INF/{AL2.0,LGPL2.1}'
-
+            excludes += ['/META-INF/{AL2.0,LGPL2.1}', '/Users/avi/.gradle/caches/modules-2/files-2.1/org.apache.pdfbox/fontbox/2.0.26/4e416198adde54b753e41d3312f799640dac5687/fontbox-2.0.26.jar', '**/fontbox-2.0.26.jar', '**/fontbox-2.0.26.jar']
         }
-//        pickFirst 'lib/armeabi-v7a/libassmidi.so'
-        exclude('/Users/avi/.gradle/caches/modules-2/files-2.1/org.apache.pdfbox/fontbox/2.0.26/4e416198adde54b753e41d3312f799640dac5687/fontbox-2.0.26.jar')
-        exclude '**/fontbox-2.0.26.jar'
-        exclude '**/fontbox-2.0.26.jar'
-
     }
 }
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
-    implementation 'androidx.activity:activity-compose:1.5.1'
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
+    implementation 'androidx.activity:activity-compose:1.7.2'
     implementation platform('androidx.compose:compose-bom:2022.10.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
-    implementation 'com.google.android.engage:engage-core:+'
+    implementation 'com.google.android.engage:engage-core:1.2.0'
     implementation 'com.google.android.gms:play-services-mlkit-text-recognition:19.0.0'
     implementation 'com.google.android.gms:play-services-auth:20.6.0'
     implementation 'androidx.navigation:navigation-runtime-ktx:2.6.0'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.6.1'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.7.0'
+    implementation 'androidx.preference:preference-ktx:1.2.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -90,7 +84,7 @@ dependencies {
     implementation "com.android.billingclient:billing-ktx:$billing_version"
 
 
-    implementation 'com.google.firebase:firebase-auth-ktx:21.1.0'
+    implementation 'com.google.firebase:firebase-auth-ktx:22.1.0'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
@@ -99,14 +93,14 @@ dependencies {
 
     implementation "io.coil-kt:coil-compose:2.2.2"
 
-    implementation "androidx.navigation:navigation-compose:2.5.3"
+    implementation "androidx.navigation:navigation-compose:2.6.0"
 
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0"
-    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.6.1"
 
 
-    implementation 'androidx.compose.material:material-icons-core:1.0.4'
-    implementation 'androidx.compose.material:material-icons-extended:1.0.4'
+    implementation 'androidx.compose.material:material-icons-core:1.4.3'
+    implementation 'androidx.compose.material:material-icons-extended:1.4.3'
 
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 }
