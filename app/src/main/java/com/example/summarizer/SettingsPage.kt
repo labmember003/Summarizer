@@ -34,7 +34,8 @@ fun SettingsScreen() {
         topBar = {
             TopAppBar(
                 title = { Text(text = "Settings") },
-                backgroundColor = Color.White
+                backgroundColor = Color.White,
+                elevation = 0.dp
             )
         },
         content = {
@@ -45,21 +46,36 @@ fun SettingsScreen() {
             ) {
                 SectionOpenLinks(openUrlLauncher, "https://sites.google.com/view/falcon-summarizer/home", "Privacy Policy")
                 SectionOpenLinks(openUrlLauncher, "https://sites.google.com/view/falcon-summarizer/resources-used", "Resources Used")
-                ContactUsSection(openUrlLauncher, context)
+                ContactUsBugReportSection(openUrlLauncher, context, "Regarding App ", "Contact Us")
+                ContactUsBugReportSection(openUrlLauncher, context, "Bug Report For ", "Bug Report")
                 OpenOpenSourceLibraryActivity(openUrlLauncher, "Open Source Libraries")
-
+                AboutSection()
             }
         }
     )
 }
 
 @Composable
-fun ContactUsSection(
+fun AboutSection() {
+    Text(
+        text = "The note-taking app for Android is a powerful tool designed to help users easily capture, organize, and retrieve their notes on-the-go. With its user-friendly interface and advanced features such as voice-to-text, image insertion, and synchronization across multiple devices, it is the perfect solution for anyone looking to stay organized and productive.",
+        fontSize = 18.sp,
+        style = MaterialTheme.typography.h5,
+        modifier = Modifier
+            .padding(0.dp, 10.dp)
+            .fillMaxWidth()
+    )
+}
+
+@Composable
+fun ContactUsBugReportSection(
     openUrlLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    context: Context
+    context: Context,
+    title: String,
+    text: String
 ) {
     Text(
-        text = "Contact Us",
+        text = text,
         fontSize = 18.sp,
         style = MaterialTheme.typography.h5,
         modifier = Modifier
@@ -67,12 +83,14 @@ fun ContactUsSection(
                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                     data = Uri.parse("mailto:") // only email apps should handle this
                     putExtra(Intent.EXTRA_EMAIL, arrayOf("usarcompanion@gmail.com"))
-                    putExtra(Intent.EXTRA_SUBJECT, "Regarding App " + R.string.app_name)
+                    putExtra(Intent.EXTRA_SUBJECT, title + R.string.app_name)
                 }
                 try {
                     openUrlLauncher.launch(emailIntent)
                 } catch (e: ActivityNotFoundException) {
-                    Toast.makeText(context, "No Mail App Found", Toast.LENGTH_SHORT).show()
+                    Toast
+                        .makeText(context, "No Mail App Found", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
             .padding(0.dp, 10.dp)
