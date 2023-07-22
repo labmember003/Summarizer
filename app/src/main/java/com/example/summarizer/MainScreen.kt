@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DrawerState
 import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
@@ -65,6 +66,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
@@ -86,6 +88,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
+import org.bouncycastle.math.raw.Mod
 import java.io.IOException
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -259,21 +262,30 @@ fun DrawerContent(
 //    val navController = rememberNavController()
 //    NavHost(navController = navController, )
 
-    Column() {
-        Image(painter = painterResource(id = R.drawable.ad), contentDescription = "App Icon")
-        Spacer(modifier = Modifier.height(2.dp))
-        NavDrawerContent("Profile", Icons.Default.Person) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+
+    ) {
+        val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.productivity))
+        com.airbnb.lottie.compose.LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(300.dp)
+        )
+        NavDrawerContent("Profile", R.drawable.baseline_person_24) {
             handleProfileButtonClickInNavigationDrawer()
         }
         Spacer(modifier = Modifier.height(2.dp))
-        NavDrawerContent("Settings", Icons.Default.Settings) {
+        NavDrawerContent("Settings", R.drawable.baseline_settings_24) {
             handleSettingsButtonClickInNavigationDrawer()
         }
     }
 }
 
 @Composable
-fun NavDrawerContent(contentName: String, icon: ImageVector, onClick: () -> Unit) {
+fun NavDrawerContent(contentName: String, imageID: Int, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
@@ -282,13 +294,23 @@ fun NavDrawerContent(contentName: String, icon: ImageVector, onClick: () -> Unit
             .clickable {
                 onClick()
             }
+            .padding(12.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentName,
-            tint = Color.Black
+        Image(
+            painter = painterResource(id = imageID),
+            contentDescription = "" ,
+            modifier = Modifier
+                .size(30.dp)
         )
-        Text(text = contentName)
+        Spacer(
+            modifier = Modifier
+                .size(5.dp)
+        )
+        Text(
+            text = contentName,
+            style = MaterialTheme.typography.body1,
+            color = Color.Unspecified
+        )
     }
 }
 
