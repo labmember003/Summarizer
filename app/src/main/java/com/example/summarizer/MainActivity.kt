@@ -65,6 +65,7 @@ import androidx.navigation.navArgument
 import com.example.summarizer.presentation.profile.ProfileScreen
 import com.example.summarizer.presentation.sign_in.SignInScreen
 import com.example.summarizer.presentation.sign_in.SignInViewModel
+import com.example.summarizer.settings.SettingsScreen
 import kotlinx.coroutines.launch
 
 
@@ -164,7 +165,9 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable("settings") {
-                        SettingsScreen()
+                        SettingsScreen {
+                            navController.popBackStack()
+                        }
                     }
                     composable("buy_token_screen") {
                         BuyTokenScreen(onCLick = { context, id ->
