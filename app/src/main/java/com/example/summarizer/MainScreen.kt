@@ -719,7 +719,6 @@ private fun getTextFromImage(
         .addOnSuccessListener { visionText ->
             val extractedText = visionText.text
             Log.i("kaaali billi", extractedText)
-            Toast.makeText(context, extractedText, Toast.LENGTH_SHORT).show()
             callback(extractedText) // Pass the result to the callback function
         }
         .addOnFailureListener { e ->

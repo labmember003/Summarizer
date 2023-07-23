@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -12,6 +13,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -71,6 +73,7 @@ import com.example.summarizer.settings.SettingsScreen
 import com.falcon.summarizer.R
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
+import java.util.Base64
 
 
 class MainActivity : ComponentActivity() {
@@ -81,6 +84,7 @@ class MainActivity : ComponentActivity() {
         )
     }
     private lateinit var billingClient: BillingClient
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -165,10 +169,8 @@ class MainActivity : ComponentActivity() {
                             }
                         , {
                             navController.navigate("settings")
-//                            navController.navigate("summarized_page")
-
                         }) { text ->
-                            navController.navigate("summarized_page/$text")
+                            navController.navigate("summarized_page/${base64Encode(text)}")
                         }
                     }
                     composable("settings") {
@@ -209,7 +211,8 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) {  entry ->
-                        SummarizedPage(summarizedText = entry.arguments?.getString("summarizedText"))
+                        val decodedString = base64Decode(entry.arguments?.getString("summarizedText"))
+                        SummarizedPage(summarizedText = decodedString)
                     }
                 }
             }
@@ -312,39 +315,7 @@ class MainActivity : ComponentActivity() {
         } else {
             tokenManager.updateToken(tokenCountOutSide + tokens.toLong())
         }
-//        Log.i("TokenToken", "tokens.toString()")
-//        Log.i("TokenToken", tokens.toString())
-//        val editor = sharedPreferences.edit()
-//        editor.putString(USER_TOKEN, tokens.toString())
-//        editor.apply()
     }
-//    @Composable
-//    fun Test() {
-//        val context = LocalContext.current
-////        sharedPreferences = remember {
-////            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
-////        }
-//
-//        Row {
-//            Button(onClick = {
-//                purchaseProduct(context, "100_coins_id")
-//            }) {
-//                Text(text = "button1")
-//            }
-//            Button(onClick = {
-//                purchaseProduct(context, "250_coins_id")
-//            }) {
-//                Text(text = "button2")
-//            }
-//            Button(onClick = {
-//                purchaseProduct(context, "500_coins_id")
-//            }) {
-//                Text(text = "button3")
-//            }
-//        }
-//    }
-
-
 }
 
 
@@ -466,4 +437,16 @@ fun isNetworkAvailable(context: Context): Boolean {
     val networkCapabilities =
         connectivityManager.getNetworkCapabilities(network) ?: return false
     return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+}
+@RequiresApi(Build.VERSION_CODES.O)
+fun base64Encode(input: String): String {
+    val bytes = input.toByteArray(Charsets.UTF_8)
+    val encodedBytes = Base64.getEncoder().encode(bytes)
+    return String(encodedBytes, Charsets.UTF_8)
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun base64Decode(input: String?): String {
+    val decodedBytes = Base64.getDecoder().decode(input)
+    return String(decodedBytes, Charsets.UTF_8)
 }
