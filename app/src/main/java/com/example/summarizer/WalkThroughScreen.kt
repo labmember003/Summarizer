@@ -33,9 +33,9 @@ import com.falcon.summarizer.R
 import com.google.accompanist.pager.HorizontalPagerIndicator
 
 val walkThroughPagerContent = listOf(
-    WalkThroughPager(R.raw.problem_solving_team, "Stay Organized", "Create, categorize, and manage all your notes with ease."),
-    WalkThroughPager(R.raw.problem_solving_team, "Sync Across Devices", "Access your notes seamlessly on all your devices."),
-    WalkThroughPager(R.raw.productivity, "Boost Productivity", "Set reminders, search notes, and stay on top of your tasks.")
+    WalkThroughPager(R.raw.summary_anim, "Instant Summaries", "Quickly get concise summaries for easy understanding."),
+    WalkThroughPager(R.raw.translate_animation, "Language Preference", "Choose preferred language for automatic conversion."),
+    WalkThroughPager(R.raw.multiple_inputs, "Multiple Inputs", "Upload PDF or use photos from gallery/camera for text extraction.")
 )
 
 @OptIn(ExperimentalFoundationApi::class)
