@@ -205,10 +205,19 @@ fun MainScreenPage(
                 BottomSheet(
                     modalSheetState,
                     onPdfOptionClicked = {
-                        launcher.launch("application/pdf")
+                        if (isNetworkAvailable(context)) {
+                            launcher.launch("application/pdf")
+                        } else {
+                            Toast.makeText(context, "Please Check Your Internet Connection And Try Again", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     onImageOptionClicked = {
-                        launcher2.launch("image/*")
+                        if (isNetworkAvailable(context)) {
+                            launcher2.launch("image/*")
+                        }
+                        else {
+                            Toast.makeText(context, "Please Check Your Internet Connection And Try Again", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 )
             }
@@ -432,6 +441,7 @@ private fun MainScreenContent(
             }
             val content = remember { mutableStateOf("") }
             var isVisible by remember { mutableStateOf(false) }
+            val context = LocalContext.current
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -455,29 +465,24 @@ private fun MainScreenContent(
                 if (isVisible) {
                     FloatingActionButton(
                         onClick = {
-
-//                        content.value ke saath navigation krna hai
-//                        val summarizedText = getResponseFromApi(content.value)
-//                        handleNavigtionFromMainScreenToSummarizedPage(summarizedText)
-                            isLoading = true
-                            getResponseFromApi(
-                                prompt = content.value,
-                                onSuccess = { response ->
-                                    Log.i("hapyhapyhapy", response)
-                                    isLoading = false
-                                    responseText = response
-                                    handleNavigtionFromMainScreenToSummarizedPage(responseText)
-                                    // Navigate to the summarized page here if needed
-                                    // You can use the responseText variable to pass the result
-                                },
-                                onError = { error ->
-                                    isLoading = false
-                                    Log.i("hapyhapyhapy", error)
-                                    // Handle the error here if needed
-                                }
-                            )
-
-
+                            if (isNetworkAvailable(context)) {
+                                isLoading = true
+                                getResponseFromApi(
+                                    prompt = content.value,
+                                    onSuccess = { response ->
+                                        Log.i("hapyhapyhapy", response)
+                                        isLoading = false
+                                        responseText = response
+                                        handleNavigtionFromMainScreenToSummarizedPage(responseText)
+                                    },
+                                    onError = { error ->
+                                        isLoading = false
+                                        Log.i("hapyhapyhapy", error)
+                                    }
+                                )
+                            } else {
+                                Toast.makeText(context, "Please Check Your Internet Connection And Try Again", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
