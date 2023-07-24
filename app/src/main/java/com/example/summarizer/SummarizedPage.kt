@@ -52,6 +52,22 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.text.input.VisualTransformation
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.runtime.*
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
+import com.example.summarizer.Utils.LANGUAGE
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -66,7 +82,10 @@ fun SummarizedPage(summarizedText: String?) {
         sheetState = modalSheetState,
         sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         sheetContent = {
-            BottomSheetFontSize(modalSheetState)
+            Column() {
+                BottomSheetFontSize(modalSheetState)
+                LanguagePicker()
+            }
         }
     ) {
         SummarizedPageContent(modalSheetState, summarizedText = summarizedText.toString())
@@ -163,10 +182,14 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState, summarizedText
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     }
     val fontSizeState = remember { mutableStateOf(sharedPreferences.getInt(FONT_SIZE, 16)) }
+    val languageState = remember { mutableStateOf(sharedPreferences.getString(LANGUAGE, "ENGLISH")) }
     DisposableEffect(Unit) {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == FONT_SIZE) {
                 fontSizeState.value = sharedPreferences.getInt(FONT_SIZE, 16)
+            }
+            if (key == LANGUAGE) {
+                languageState.value = sharedPreferences.getString(LANGUAGE, "ENGLISH")
             }
         }
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
@@ -292,4 +315,119 @@ private fun HeadingSummarizedPage(modalSheetState: ModalBottomSheetState) {
         }
     }
 
+}
+
+
+
+enum class Language2 {
+    ENGLISH, HINDI, MARATHI, EAST
+}
+
+data class Language (
+    val name: String,
+    val code: String
+    )
+
+@Composable
+fun LanguagePicker(){
+    val context = LocalContext.current
+    val sharedPreferences = remember {
+        context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+    }
+    val language = sharedPreferences.getString(LANGUAGE, "ENGLISH")
+    Log.i(LANGUAGE, "meow "+language.toString())
+    var mSelectedText by remember { mutableStateOf(language) }
+    val editor = sharedPreferences.edit()
+
+
+
+
+
+
+    // Declaring a boolean value to store
+    // the expanded state of the Text Field
+    var mExpanded by remember { mutableStateOf(false) }
+
+    // Create a list of cities
+    val languages = listOf("ENGLISH", "हिंदी","मराठी")
+    // Create a string value to store the selected city
+//    var mSelectedText by remember { mutableStateOf("ENGLISH") }
+
+    var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
+
+    // Up Icon when expanded and down icon when collapsed
+    val icon = if (mExpanded)
+        Icons.Filled.KeyboardArrowUp
+    else
+        Icons.Filled.KeyboardArrowDown
+
+    Column(
+        Modifier
+            .padding(20.dp)
+    ) {
+
+        // Create an Outlined Text Field
+        // with icon and not expanded
+        OutlinedTextField(
+            readOnly = true,
+            value = mSelectedText.toString(),
+            onValueChange = {
+                mSelectedText = it
+                editor.putString(LANGUAGE, it)
+                editor.apply()
+//                TRY HERE TO OPEN DROP DOWN TODO()
+                            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coordinates ->
+                    // This value is used to assign to
+                    // the DropDown the same width
+                    mTextFieldSize = coordinates.size.toSize()
+                }
+
+
+            ,
+            label = {Text("Language", modifier = Modifier
+                .clickable {
+                    mExpanded = !mExpanded
+                })},
+            trailingIcon = {
+                Icon(icon,"contentDescription",
+                    Modifier
+                        .size(35.dp)
+                        .clickable {
+                            mExpanded = !mExpanded
+                        }
+                )
+            }
+        )
+
+        // Create a drop-down menu with list of cities,
+        // when clicked, set the Text Field text as the city selected
+        DropdownMenu(
+            expanded = mExpanded,
+            onDismissRequest = { mExpanded = false },
+            modifier = Modifier
+                .width(with(LocalDensity.current){mTextFieldSize.width.toDp()})
+                .clickable {
+                    mExpanded = true
+                }
+        ) {
+            languages.forEach { label ->
+                DropdownMenuItem(onClick = {
+
+                    editor.putString(LANGUAGE, label)
+                    editor.apply()
+
+                    mSelectedText = label
+                    mExpanded = false
+                }) {
+                    Text(
+                        text = label,
+                        modifier = Modifier
+                    )
+                }
+            }
+        }
+    }
 }
