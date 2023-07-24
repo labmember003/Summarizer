@@ -65,6 +65,7 @@ import com.android.billingclient.api.BillingResult
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.SkuDetailsParams
+import com.example.summarizer.Utils.ERROR_TAG
 import com.example.summarizer.presentation.profile.ProfileScreen
 import com.example.summarizer.presentation.sign_in.GoogleAuthUiClient
 import com.example.summarizer.presentation.sign_in.SignInScreen
@@ -218,10 +219,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-
-
-
-
         billingClient = BillingClient.newBuilder(this)
             .setListener(purchaseUpdateListener)
             .enablePendingPurchases()
@@ -271,8 +268,10 @@ class MainActivity : ComponentActivity() {
             }
         } else if (billingResult.responseCode == BillingClient.BillingResponseCode.USER_CANCELED) {
             // Handle user cancellation
+            Log.i(ERROR_TAG, "Purchase canceled by the user")
         } else {
             // Handle other billing errors
+            Log.i(ERROR_TAG, "Purchase canceled by the user")
         }
     }
 
@@ -282,42 +281,34 @@ class MainActivity : ComponentActivity() {
         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
             // Purchase is valid
             val sku = purchase.skus[0] // SKU of the purchased product
-
             // Grant tokens based on the SKU
             when (sku) {
-                "100_coins_id" -> grantTokens(100)
+                "100_coins_id" -> {
+                    Log.i("rj3r3r", "100_coins_id")
+                    grantTokens(100)
+                }
                 "250_coins_id" -> grantTokens(250)
                 "500_coins_id" -> grantTokens(500)
             }
         } else if (purchase.purchaseState == Purchase.PurchaseState.UNSPECIFIED_STATE) {
             // Purchase was canceled by the user
             // Display a message to the user indicating the cancellation
-            Log.i("TokenToken", "Purchase canceled by the user")
+            Log.i(ERROR_TAG, "Purchase canceled by the user")
         }
     }
 
     private fun grantTokens(tokens: Int) {
-//        Log.i("meowmeowmeowmeowhappy", "Account Not Signed")
         val tokenManager = TokenManager()
-        var tokenCountOutSide: Long = -1
-
         tokenManager.getToken { tokenCount ->
             if (tokenCount != null) {
-                tokenCountOutSide = tokenCount
-                println("Token count meow: $tokenCount")
-                Log.i("kwfkbwekef", tokenCount.toString())
-                println("Token count meow: $tokenCount")
+                // ADD PURCHASED TOKENS IN USER'S ACCOUNT
+                tokenManager.updateToken(tokenCount + tokens.toLong())
+            } else {
+                Log.i(ERROR_TAG, "Account Not Signed")
             }
-        }
-
-        if (tokenCountOutSide.toInt() == -1) {
-            Log.i("meowmeowmeowmeow", "Account Not Signed")
-        } else {
-            tokenManager.updateToken(tokenCountOutSide + tokens.toLong())
         }
     }
 }
-
 
 enum class PAGES {
     LOGIN, WALKTHROUGH, MAINPAGE, BUYTOKEN
@@ -377,7 +368,6 @@ fun EditText(text: String, visualTransformation: VisualTransformation = VisualTr
         visualTransformation = visualTransformation
     )
 }
-
 
 @Composable
 fun GoogleSignInCard(

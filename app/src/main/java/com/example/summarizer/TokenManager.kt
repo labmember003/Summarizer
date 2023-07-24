@@ -8,7 +8,7 @@ class TokenManager {
     private val db = FirebaseFirestore.getInstance()
     private val user = FirebaseAuth.getInstance().currentUser
 
-    fun putToken(tokenCount: Long) {
+    private fun putToken(tokenCount: Long) {
         val userDocRef = db.collection("users").document(user?.uid ?: "")
         userDocRef.set(mapOf("tokenCount" to tokenCount))
             .addOnSuccessListener {
