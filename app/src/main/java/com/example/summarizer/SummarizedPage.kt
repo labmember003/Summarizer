@@ -1,5 +1,6 @@
 package com.example.summarizer
 
+import android.os.Handler
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -52,10 +53,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.text.input.VisualTransformation
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -64,11 +61,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.example.summarizer.Utils.LANGUAGE
-
+import com.falcon.summarizer.R
+import com.google.auth.oauth2.GoogleCredentials
+import com.google.cloud.translate.Translate
+import com.google.cloud.translate.TranslateOptions
+import com.google.cloud.translate.Translation
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SummarizedPage(summarizedText: String?) {
@@ -78,17 +77,34 @@ fun SummarizedPage(summarizedText: String?) {
         confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded },
         skipHalfExpanded = true
     )
+    val languages = listOf(
+        Language("English", "en"),
+        Language("Español", "es"), // Spanish
+        Language("Français", "fr"), // French
+        Language("Deutsch", "de"), // German
+        Language("简体中文", "zh"), // Chinese (Simplified)
+        Language("日本語", "ja"), // Japanese
+        Language("العربية", "ar"), // Arabic
+        Language("हिन्दी", "hi"), // Hindi
+        Language("русский", "ru"), // Russian
+        Language("한국어", "ko"), // Korean
+        Language("Italiano", "it"), // Italian
+        Language("Português", "pt") // Portuguese
+        // Add more languages as needed
+    )
+    val languageMap: Map<String, String> = languages.associate { it.languageName to it.languageCode }
     ModalBottomSheetLayout(
         sheetState = modalSheetState,
         sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         sheetContent = {
             Column() {
                 BottomSheetFontSize(modalSheetState)
-                LanguagePicker()
+
+                LanguagePicker(languages)
             }
         }
     ) {
-        SummarizedPageContent(modalSheetState, summarizedText = summarizedText.toString())
+        SummarizedPageContent(modalSheetState, summarizedText = summarizedText.toString(), languageMap = languageMap)
     }
 
 
@@ -176,13 +192,19 @@ fun FontSizeSection(selectedFontSize: Int, onFontSizeSelected: (Int) -> Unit) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun SummarizedPageContent(modalSheetState: ModalBottomSheetState, summarizedText: String) {
+fun SummarizedPageContent(
+    modalSheetState: ModalBottomSheetState,
+    summarizedText: String,
+    languageMap: Map<String, String>
+) {
     val context = LocalContext.current
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     }
     val fontSizeState = remember { mutableStateOf(sharedPreferences.getInt(FONT_SIZE, 16)) }
     val languageState = remember { mutableStateOf(sharedPreferences.getString(LANGUAGE, "ENGLISH")) }
+    var languageCode = languageMap[languageState.value]
+    Log.i("catcatcatcat", languageCode.toString())
     DisposableEffect(Unit) {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == FONT_SIZE) {
@@ -190,6 +212,8 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState, summarizedText
             }
             if (key == LANGUAGE) {
                 languageState.value = sharedPreferences.getString(LANGUAGE, "ENGLISH")
+                languageCode = languageMap[languageState.value]
+                Log.i("catcatcatcat - 22222", languageCode.toString())
             }
         }
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
@@ -199,70 +223,79 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState, summarizedText
         }
     }
 
-    Column() {
+    Column {
         HeadingSummarizedPage(modalSheetState)
-        val content = remember { mutableStateOf(summarizedText) }
-
-        OutlinedTextField(
-            trailingIcon = {
-                val context = LocalContext.current
-                val clipboardManager = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-                Column(
+        val summary = remember { mutableStateOf(summarizedText) }
+        val isTranslationLoading = remember {mutableStateOf(false)}
+//        val content = remember { mutableStateOf(translateText(summary.value, languageCode.toString(), isTranslationLoading)) }
+        val content2 = translateText(summary.value, languageCode.toString(), isTranslationLoading)
+        Log.i("catqwertyuiopp", content2)
+//        Log.i("catqwertyuiopp - 1", content.value)
+        if (!isTranslationLoading.value) {
+            OutlinedTextField(
+                trailingIcon = {
+                    val context = LocalContext.current
+                    val clipboardManager = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                    Column(
 //                TODO("UPAR KAISE LAU ISSE?)
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.SpaceEvenly,
+                        horizontalAlignment = Alignment.Start,
 //                    modifier = Modifier
 //                        .clickable {
 //                            clipboardManager.setPrimaryClip(ClipData.newPlainText("Copied Text", content.value))
 //                        }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.ContentCopy,
-                        contentDescription = "Email",
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .clickable {
-                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Copied Text", content.value))
-                            }
-                    )
-                    Spacer(modifier = Modifier.size(20.dp))
-                    Icon(
-                        imageVector = Icons.Filled.Download,
-                        contentDescription = "Email",
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .clickable {
-                                downloadTextPdf(content.value, context)
-                            }
-                    )
-                    Spacer(modifier = Modifier.size(20.dp))
-                    Icon(
-                        imageVector = Icons.Filled.Share,
-                        contentDescription = "Email",
-                        tint = Color.Gray,
-                        modifier = Modifier
-                            .clickable {
-                                shareText(content.value, context)
-                            }
-                    )
-                }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ContentCopy,
+                            contentDescription = "Email",
+                            tint = Color.Gray,
+                            modifier = Modifier
+                                .clickable {
+                                    clipboardManager.setPrimaryClip(ClipData.newPlainText("Copied Text", content2))
+                                }
+                        )
+                        Spacer(modifier = Modifier.size(20.dp))
+                        Icon(
+                            imageVector = Icons.Filled.Download,
+                            contentDescription = "Email",
+                            tint = Color.Gray,
+                            modifier = Modifier
+                                .clickable {
+                                    downloadTextPdf(content2, context)
+                                }
+                        )
+                        Spacer(modifier = Modifier.size(20.dp))
+                        Icon(
+                            imageVector = Icons.Filled.Share,
+                            contentDescription = "Email",
+                            tint = Color.Gray,
+                            modifier = Modifier
+                                .clickable {
+                                    shareText(content2, context)
+                                }
+                        )
+                    }
 
-            },
-            value = content.value,
-            readOnly = true,
-            enabled = true,
-            onValueChange = {
+                },
+                value = content2,
+                readOnly = true,
+                enabled = true,
+                onValueChange = {
 
-            },
-            label = { Text("Summarized Text") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            visualTransformation = VisualTransformation.None,
-            textStyle = TextStyle(
-                fontSize = fontSizeState.value.sp
+                },
+                label = { Text("Summarized Text") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                visualTransformation = VisualTransformation.None,
+                textStyle = TextStyle(
+                    fontSize = fontSizeState.value.sp
+                )
             )
-        )
+        } else {
+            LottieAnimation(animationID = R.raw.translate_animation)
+        }
+
     }
 
 }
@@ -318,18 +351,8 @@ private fun HeadingSummarizedPage(modalSheetState: ModalBottomSheetState) {
 }
 
 
-
-enum class Language2 {
-    ENGLISH, HINDI, MARATHI, EAST
-}
-
-data class Language (
-    val name: String,
-    val code: String
-    )
-
 @Composable
-fun LanguagePicker(){
+fun LanguagePicker(languages: List<Language>){
     val context = LocalContext.current
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
@@ -349,7 +372,15 @@ fun LanguagePicker(){
     var mExpanded by remember { mutableStateOf(false) }
 
     // Create a list of cities
-    val languages = listOf("ENGLISH", "हिंदी","मराठी")
+
+
+
+
+
+    val languageMap: Map<String, String> = languages.associate { it.languageName to it.languageCode }
+//    println(languageMap["English"])
+
+
     // Create a string value to store the selected city
 //    var mSelectedText by remember { mutableStateOf("ENGLISH") }
 
@@ -408,7 +439,7 @@ fun LanguagePicker(){
             expanded = mExpanded,
             onDismissRequest = { mExpanded = false },
             modifier = Modifier
-                .width(with(LocalDensity.current){mTextFieldSize.width.toDp()})
+                .width(with(LocalDensity.current) { mTextFieldSize.width.toDp() })
                 .clickable {
                     mExpanded = true
                 }
@@ -416,14 +447,16 @@ fun LanguagePicker(){
             languages.forEach { label ->
                 DropdownMenuItem(onClick = {
 
-                    editor.putString(LANGUAGE, label)
+                    editor.putString(LANGUAGE, label.languageName)
                     editor.apply()
+                    Log.i("qwertyuiop", label.languageName)
+                    Log.i("qwertyuiop", "label.languageName")
 
-                    mSelectedText = label
+                    mSelectedText = label.languageName
                     mExpanded = false
                 }) {
                     Text(
-                        text = label,
+                        text = label.languageName,
                         modifier = Modifier
                     )
                 }
@@ -431,3 +464,36 @@ fun LanguagePicker(){
         }
     }
 }
+
+fun translateText(sourceText: String, targetLanguageCode: String, isLoading: MutableState<Boolean>): String {
+    val API_KEY = "YOUR_GOOGLE_CLOUD_API_KEY_INPUT_STREAM"
+    isLoading.value = true
+    // Replace 'YOUR_GOOGLE_CLOUD_API_KEY' with your actual API key or use another authentication method.
+    val credentials = GoogleCredentials.fromStream(API_KEY.toByteArray().inputStream())
+    val translate = TranslateOptions.newBuilder().setCredentials(credentials).build().service
+    val translation: Translation = translate.translate(
+        sourceText,
+        Translate.TranslateOption.targetLanguage(targetLanguageCode)
+    )
+    isLoading.value = false
+    return translation.translatedText
+}
+
+//fun translateText(sourceText: String, targetLanguageCode: String, isLoading: MutableState<Boolean>): String {
+//    isLoading.value = true
+//    delayWithoutSuspend(5000) {
+//        println("Delayed action executed after 2 seconds.")
+//    }
+//    return if (targetLanguageCode == "en") {
+//        isLoading.value = false
+//        "meow"
+//    } else {
+//        isLoading.value = false
+//        "लिखित शब्द या पाठ"
+//    }
+//}
+//
+//
+//fun delayWithoutSuspend(timeMillis: Long, action: () -> Unit) {
+//    Handler().postDelayed(action, timeMillis)
+//}
