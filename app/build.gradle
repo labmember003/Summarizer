@@ -45,8 +45,11 @@ android {
         resources {
             excludes += ['/META-INF/{AL2.0,LGPL2.1}', '/Users/avi/.gradle/caches/modules-2/files-2.1/org.apache.pdfbox/fontbox/2.0.26/4e416198adde54b753e41d3312f799640dac5687/fontbox-2.0.26.jar', '**/fontbox-2.0.26.jar', '**/fontbox-2.0.26.jar']
         }
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/DEPENDENCIES'
     }
 }
+
 
 dependencies {
 
@@ -62,7 +65,6 @@ dependencies {
     implementation 'com.google.android.gms:play-services-mlkit-text-recognition:19.0.0'
     implementation 'com.google.android.gms:play-services-auth:20.6.0'
     implementation 'androidx.navigation:navigation-runtime-ktx:2.6.0'
-    implementation 'com.google.firebase:firebase-firestore-ktx:24.7.0'
     implementation 'androidx.preference:preference-ktx:1.2.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
@@ -85,7 +87,6 @@ dependencies {
     implementation "com.android.billingclient:billing-ktx:$billing_version"
 
 
-    implementation 'com.google.firebase:firebase-auth-ktx:22.1.0'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
@@ -107,4 +108,11 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-oss-licenses:17.0.1'
 
+    implementation ("com.google.firebase:firebase-firestore-ktx:24.7.0")
+    implementation ("com.google.firebase:firebase-auth-ktx:22.1.0")
+    implementation ("com.google.cloud:google-cloud-translate:2.3.0") {
+        exclude group: "com.google.api.grpc", module: "proto-google-common-protos"
+        exclude group: "com.google.protobuf"
+        exclude group: "org.bouncycastle"
+    }
 }
