@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
+import com.example.summarizer.Language
 import com.falcon.summarizer.R
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 
@@ -77,9 +78,26 @@ fun SettingsScreen(onBackCLick: () -> Boolean) {
         val openOssLicensesMenuActivity = {
             startActivity(context, Intent(context, OssLicensesMenuActivity::class.java), null)
         }
+        val languages = listOf(
+            Language("English", "en"),
+            Language("Español", "es"), // Spanish
+            Language("Français", "fr"), // French
+            Language("Deutsch", "de"), // German
+            Language("简体中文", "zh"), // Chinese (Simplified)
+            Language("日本語", "ja"), // Japanese
+            Language("العربية", "ar"), // Arabic
+            Language("हिन्दी", "hi"), // Hindi
+            Language("русский", "ru"), // Russian
+            Language("한국어", "ko"), // Korean
+            Language("Italiano", "it"), // Italian
+            Language("Português", "pt") // Portuguese
+            // Add more languages as needed
+        )
+        val languageMap: Map<String, String> = languages.associate { it.languageName to it.languageCode }
         Column {
             PreferenceCategory("General")
             RegularPreference("Contact Us", "", {sendMail("Regarding App ")})
+            LanguagePicker(languages = languages)
             PreferenceCategory("About")
             RegularPreference("Introducing \"Summarizer\" - a user-friendly app that streamlines your reading experience. Whether it's a PDF, an image from your gallery, or a real-time photo captured by your camera, this powerful tool swiftly extracts text and generates concise summaries. Select your preferred language for summarization, ensuring content is presented in a language you understand best. With \"Summarizer,\" effortlessly grasp the main ideas and key points, transforming the way you consume information and saving you valuable time.", "", {})
             PreferenceCategory("Developer")
