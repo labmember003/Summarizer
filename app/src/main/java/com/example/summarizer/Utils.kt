@@ -5,4 +5,5 @@ object Utils {
     const val ERROR_TAG = "ERROR_TAG"
     const val FONT_SIZE = "FONT_SIZE"
     const val LANGUAGE = "LANGUAGE"
+    const val INITIAL_LAUCH = "INITIAL_LAUCH"
 }
