@@ -32,7 +32,7 @@ import com.example.summarizer.Language
 import com.example.summarizer.Utils.LANGUAGE
 
 @Composable
-fun LanguagePicker(languages: List<Language>){
+fun LanguagePicker(languages: List<String>){
     val context = LocalContext.current
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
@@ -43,7 +43,7 @@ fun LanguagePicker(languages: List<Language>){
     val editor = sharedPreferences.edit()
 
     var mExpanded by remember { mutableStateOf(false) }
-    val languageMap: Map<String, String> = languages.associate { it.languageName to it.languageCode }
+//    val languageMap: Map<String, String> = languages.associate { it.languageName to it.languageCode }
     var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
     val icon = if (mExpanded)
         Icons.Filled.KeyboardArrowUp
@@ -93,17 +93,17 @@ fun LanguagePicker(languages: List<Language>){
                     mExpanded = true
                 }
         ) {
-            languages.forEach { label ->
+            languages.forEach { language ->
                 DropdownMenuItem(onClick = {
-                    editor.putString(LANGUAGE, label.languageName)
+                    editor.putString(LANGUAGE, language)
                     editor.apply()
-                    Log.i("qwertyuiop", label.languageName)
+                    Log.i("qwertyuiop", language)
                     Log.i("qwertyuiop", "label.languageName")
-                    mSelectedText = label.languageName
+                    mSelectedText = language
                     mExpanded = false
                 }) {
                     Text(
-                        text = label.languageName,
+                        text = language,
                         modifier = Modifier
                     )
                 }

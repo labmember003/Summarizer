@@ -174,8 +174,23 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("summarized_page/${base64Encode(text)}")
                         }
                     }
+                    //        val languages = listOf(
+                    //            Language("English", "en"),
+                    //            Language("Español", "es"), // Spanish
+                    //            Language("Français", "fr"), // French
+                    //            Language("Deutsch", "de"), // German
+                    //            Language("简体中文", "zh"), // Chinese (Simplified)
+                    //            Language("日本語", "ja"), // Japanese
+                    //            Language("العربية", "ar"), // Arabic
+                    //            Language("हिन्दी", "hi"), // Hindi
+                    //            Language("русский", "ru"), // Russian
+                    //            Language("한국어", "ko"), // Korean
+                    //            Language("Italiano", "it"), // Italian
+                    //            Language("Português", "pt") // Portuguese
+                    val languages = listOf("English", "Español", "Français", "Deutsch",
+                        "简体中文", "日本語", "العربية", "हिन्दी", "русский", "한국어", "Italiano", "Português")
                     composable("settings") {
-                        SettingsScreen {
+                        SettingsScreen (languages){
                             navController.popBackStack()
                         }
                     }

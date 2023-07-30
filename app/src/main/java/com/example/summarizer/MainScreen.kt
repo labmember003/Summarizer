@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DrawerState
 import androidx.compose.material.DrawerValue
 import androidx.compose.material.ExperimentalMaterialApi
@@ -43,8 +42,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.NavigateNext
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.FloatingActionButton
@@ -60,16 +57,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.summarizer.Utils.LANGUAGE
 import com.example.summarizer.retrofit.ApiUtilities
 import com.example.summarizer.retrofit.ChatRequest
 import com.falcon.summarizer.R
@@ -84,11 +80,9 @@ import com.tom_roush.pdfbox.text.PDFTextStripper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
-import org.bouncycastle.math.raw.Mod
 import java.io.IOException
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -122,6 +116,11 @@ fun MainScreenPage(
     }
     var isLoading by remember { mutableStateOf(false) }
     var responseText by remember { mutableStateOf("") }
+    val sharedPreferences = remember {
+        context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+    }
+    val language = sharedPreferences.getString(LANGUAGE, "English")
+
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             val text = extractTextFromPdf(uri, context)
@@ -130,6 +129,7 @@ fun MainScreenPage(
 //            val summarizedText = getResponseFromApi(text)
 //            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
             isLoading = true
+
             getResponseFromApi(
                 prompt = text,
                 onSuccess = { response ->
@@ -145,7 +145,8 @@ fun MainScreenPage(
                     Log.i("hapyhapyhapy - 2", error)
                     handleNavigtionFromMainScreenToSummarizedPage(error)
                     // Handle the error here if needed
-                }
+                },
+                language
             )
         }
     }
@@ -175,7 +176,8 @@ fun MainScreenPage(
                         Log.i("hapyhapyhapy - 2", error)
                         handleNavigtionFromMainScreenToSummarizedPage(error)
                         // Handle the error here if needed
-                    }
+                    },
+                    language = language
                 )
             }
 //            val summarizedText = getResponseFromApi(text)
@@ -330,7 +332,8 @@ fun NavDrawerContent(contentName: String, imageID: Int, onClick: () -> Unit) {
 fun getResponseFromApi(
     prompt: String,
     onSuccess: (String) -> Unit,
-    onError: (String) -> Unit
+    onError: (String) -> Unit,
+    language: String?
 ) {
     val requestBody = RequestBody.create(
         "application/json".toMediaType(),
@@ -338,7 +341,7 @@ fun getResponseFromApi(
             ChatRequest(
                 250,
                 "text-davinci-003",
-                prompt = "Summarise this text: \n$prompt",
+                prompt = "Summarise this text in $language: \n$prompt",
                 0.7
             )
         )
@@ -462,6 +465,10 @@ private fun MainScreenContent(
                         .fillMaxSize()
                         .padding(16.dp)
                 )
+                val sharedPreferences = remember {
+                    context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+                }
+                val language = sharedPreferences.getString(LANGUAGE, "English")
                 if (isVisible) {
                     FloatingActionButton(
                         onClick = {
@@ -478,7 +485,8 @@ private fun MainScreenContent(
                                     onError = { error ->
                                         isLoading = false
                                         Log.i("hapyhapyhapy", error)
-                                    }
+                                    },
+                                    language = language
                                 )
                             } else {
                                 Toast.makeText(context, "Please Check Your Internet Connection And Try Again", Toast.LENGTH_SHORT).show()
