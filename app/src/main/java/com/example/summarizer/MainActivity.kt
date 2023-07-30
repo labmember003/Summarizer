@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
@@ -66,16 +67,17 @@ import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.SkuDetailsParams
 import com.example.summarizer.Utils.ERROR_TAG
+import com.example.summarizer.Utils.INITIAL_LAUCH
 import com.example.summarizer.presentation.profile.ProfileScreen
 import com.example.summarizer.presentation.sign_in.GoogleAuthUiClient
 import com.example.summarizer.presentation.sign_in.SignInScreen
 import com.example.summarizer.presentation.sign_in.SignInViewModel
 import com.example.summarizer.settings.SettingsScreen
+import com.example.summarizer.ui.PreferredLanguageScreen
 import com.falcon.summarizer.R
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 import java.util.Base64
-
 
 class MainActivity : ComponentActivity() {
     private val googleAuthUiClient by lazy {
@@ -98,6 +100,11 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = "walk_through_screen") {
 
                     composable("walk_through_screen") {
+                        BackHandler(
+                            onBack = {
+                                finish()
+                            }
+                        )
                         LaunchedEffect(key1 = Unit) {
                             if(googleAuthUiClient.getSignedInUser() != null) {
                                 navController.navigate("main_screen")
@@ -139,7 +146,7 @@ class MainActivity : ComponentActivity() {
 //                                    Toast.LENGTH_LONG
 //                                ).show()
 
-                                navController.navigate("main_screen")
+                                navController.navigate("prefered_language_screen")
                                 viewModel.resetState()
                             }
                         }
@@ -160,6 +167,22 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         )
+                    }
+                    val languages = listOf("English", "Español", "Français", "Deutsch",
+                        "简体中文", "日本語", "العربية", "हिन्दी", "русский", "한국어", "Italiano", "Português")
+                    composable("prefered_language_screen") {
+                        val sharedPreferences = remember {
+                            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+                        }
+                        if (sharedPreferences.getBoolean(INITIAL_LAUCH, true)) {
+                            PreferredLanguageScreen(languages = languages, navController = navController)
+                        } else {
+                            LaunchedEffect(key1 = Unit) {
+                                if(googleAuthUiClient.getSignedInUser() != null) {
+                                    navController.navigate("main_screen")
+                                }
+                            }
+                        }
                     }
                     composable("main_screen") {
                         MainScreen (
@@ -187,8 +210,7 @@ class MainActivity : ComponentActivity() {
                     //            Language("한국어", "ko"), // Korean
                     //            Language("Italiano", "it"), // Italian
                     //            Language("Português", "pt") // Portuguese
-                    val languages = listOf("English", "Español", "Français", "Deutsch",
-                        "简体中文", "日本語", "العربية", "हिन्दी", "русский", "한국어", "Italiano", "Português")
+
                     composable("settings") {
                         SettingsScreen (languages){
                             navController.popBackStack()
@@ -201,7 +223,11 @@ class MainActivity : ComponentActivity() {
                             navController.popBackStack()
                         })
                     }
+
                     composable("profile") {
+                        val sharedPreferences = remember {
+                            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+                        }
                         ProfileScreen(
                             userData = googleAuthUiClient.getSignedInUser(),
                             onSignOut = {
@@ -212,9 +238,15 @@ class MainActivity : ComponentActivity() {
 //                                        "Signed out",
 //                                        Toast.LENGTH_LONG
 //                                    ).show()
-                                    navController.popBackStack()
-                                    navController.popBackStack()
+//                                    navController.popBackStack()
+//                                    navController.popBackStack()
+//                                    navController.popBackStack()
+//                                    navController.popBackStack()
+                                    navController.navigate("walk_through_screen")
                                 }
+                                val editor = sharedPreferences.edit()
+                                editor.clear()
+                                editor.apply()
                             }
                         )
                     }

@@ -104,7 +104,7 @@ fun LoginScreen() {
         }
     }
 }
-
+@Preview
 @Composable
 fun Login() {
     Column(
@@ -117,7 +117,8 @@ fun Login() {
         LoginButton("Login", PAGES.MAINPAGE)
     }
 }
-@Preview
+
+
 @Composable
 fun SignUp() {
     Column(
