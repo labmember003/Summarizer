@@ -77,7 +77,7 @@ import com.example.summarizer.ui.PreferredLanguageScreen
 import com.falcon.summarizer.R
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
-import java.util.Base64
+import android.util.Base64;
 
 class MainActivity : ComponentActivity() {
     private val googleAuthUiClient by lazy {
@@ -185,6 +185,11 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable("main_screen") {
+                        BackHandler(
+                            onBack = {
+                                finish()
+                            }
+                        )
                         MainScreen (
                             {
                                 navController.navigate("buy_token_screen")
@@ -475,15 +480,12 @@ fun isNetworkAvailable(context: Context): Boolean {
         connectivityManager.getNetworkCapabilities(network) ?: return false
     return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
-@RequiresApi(Build.VERSION_CODES.O)
 fun base64Encode(input: String): String {
     val bytes = input.toByteArray(Charsets.UTF_8)
-    val encodedBytes = Base64.getEncoder().encode(bytes)
-    return String(encodedBytes, Charsets.UTF_8)
+    return  Base64.encodeToString(bytes, Base64.URL_SAFE)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 fun base64Decode(input: String?): String {
-    val decodedBytes = Base64.getDecoder().decode(input)
+    val decodedBytes = Base64.decode(input, Base64.URL_SAFE)
     return String(decodedBytes, Charsets.UTF_8)
 }
