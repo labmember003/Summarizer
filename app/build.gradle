@@ -110,9 +110,4 @@ dependencies {
 
     implementation ("com.google.firebase:firebase-firestore-ktx:24.7.0")
     implementation ("com.google.firebase:firebase-auth-ktx:22.1.0")
-    implementation ("com.google.cloud:google-cloud-translate:2.3.0") {
-        exclude group: "com.google.api.grpc", module: "proto-google-common-protos"
-        exclude group: "com.google.protobuf"
-        exclude group: "org.bouncycastle"
-    }
 }
