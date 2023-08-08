@@ -78,6 +78,7 @@ import com.falcon.summarizer.R
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 import android.util.Base64;
+import androidx.navigation.NavHostController
 
 class MainActivity : ComponentActivity() {
     private val googleAuthUiClient by lazy {
@@ -87,6 +88,7 @@ class MainActivity : ComponentActivity() {
         )
     }
     private lateinit var billingClient: BillingClient
+    private lateinit var _navController: NavHostController
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,6 +98,7 @@ class MainActivity : ComponentActivity() {
                 color = MaterialTheme.colors.background
             ) {
                 val navController = rememberNavController()
+                _navController = navController
                 val context = LocalContext.current
                 NavHost(navController = navController, startDestination = "walk_through_screen") {
 
@@ -320,9 +323,11 @@ class MainActivity : ComponentActivity() {
             }
         } else if (billingResult.responseCode == BillingClient.BillingResponseCode.USER_CANCELED) {
             // Handle user cancellation
+            Toast.makeText(applicationContext, "Purchase canceled by the user", Toast.LENGTH_SHORT).show()
             Log.i(ERROR_TAG, "Purchase canceled by the user")
         } else {
             // Handle other billing errors
+            Toast.makeText(applicationContext, "Purchase canceled by the user", Toast.LENGTH_SHORT).show()
             Log.i(ERROR_TAG, "Purchase canceled by the user")
         }
     }
@@ -335,12 +340,10 @@ class MainActivity : ComponentActivity() {
             val sku = purchase.skus[0] // SKU of the purchased product
             // Grant tokens based on the SKU
             when (sku) {
-                "100_coins_id" -> {
-                    Log.i("rj3r3r", "100_coins_id")
-                    grantTokens(100)
-                }
-                "250_coins_id" -> grantTokens(250)
-                "500_coins_id" -> grantTokens(500)
+                "3500_coins_for_50" -> grantTokens(3500)
+                "8000_coins_for_100" -> grantTokens(8000)
+                "20000_coins_for_200" -> grantTokens(20000)
+                "50000_coins_for_500" -> grantTokens(50000)
             }
         } else if (purchase.purchaseState == Purchase.PurchaseState.UNSPECIFIED_STATE) {
             // Purchase was canceled by the user
@@ -355,6 +358,8 @@ class MainActivity : ComponentActivity() {
             if (tokenCount != null) {
                 // ADD PURCHASED TOKENS IN USER'S ACCOUNT
                 tokenManager.updateToken(tokenCount + tokens.toLong())
+                Toast.makeText(applicationContext, "Thanks For Your Purchase", Toast.LENGTH_SHORT).show()
+                _navController.popBackStack()
             } else {
                 Log.i(ERROR_TAG, "Account Not Signed")
             }

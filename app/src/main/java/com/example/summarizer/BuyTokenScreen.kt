@@ -88,14 +88,17 @@ fun BuyTokenScreen(
                     modifier = Modifier
                         .height(10.dp)
                 )
-                BuyToken(100, 50) {
-                    onCLick(context, "100_coins_id")
+                BuyToken(3500, 50) {
+                    onCLick(context, "3500_coins_for_50")
                 }
-                BuyToken(200, 100) {
-                    onCLick(context, "250_coins_id")
+                BuyToken(8000, 100) {
+                    onCLick(context, "8000_coins_for_100")
                 }
-                BuyToken(500, 250) {
-                    onCLick(context, "500_coins_id")
+                BuyToken(20000, 200) {
+                    onCLick(context, "20000_coins_for_200")
+                }
+                BuyToken(50000, 500) {
+                    onCLick(context, "50000_coins_for_500")
                 }
             }
         }
