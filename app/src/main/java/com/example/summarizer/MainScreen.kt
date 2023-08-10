@@ -4,13 +4,16 @@ package com.example.summarizer
 
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -193,7 +196,39 @@ fun MainScreenPage(
 
         }
     }
-    if (isLoading || isLoading2) {
+    val imageBitmapState = remember { mutableStateOf<Bitmap?>(null) }
+    var isLoading3 by remember { mutableStateOf(false) }
+    val launcher3 = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        isLoading3 = true
+        if (result.resultCode == ComponentActivity.RESULT_OK) {
+            val data: Intent? = result.data
+            val imageBitmap = data?.extras?.get("data")?.let { it as android.graphics.Bitmap }
+            imageBitmapState.value = imageBitmap
+            if (imageBitmap != null) {
+                getTextFromImage(imageBitmap, recognizer, context) { extractedText ->
+                    Log.i("hapyhapyhapy - text - in", extractedText)
+                    Log.i("hapyhapyhapy - text", extractedText)
+                    getResponseFromApi(
+                        prompt = extractedText,
+                        onSuccess = { response ->
+                            Log.i("hapyhapyhapy - 1", response)
+                            isLoading3 = false
+                            handleNavigtionFromMainScreenToSummarizedPage(response)
+                        },
+                        onError = { error ->
+                            isLoading3 = false
+                            Log.i("hapyhapyhapy - 2", error)
+                            handleNavigtionFromMainScreenToSummarizedPage(error)
+                        },
+                        language = language,
+                        onTokenCountClick = onTokenCountClick,
+                        context = context
+                    )
+                }
+            }
+        }
+    }
+    if (isLoading || isLoading2 || isLoading3) {
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -207,7 +242,7 @@ fun MainScreenPage(
                     .size(400.dp)
             )
         }
-    } else if (!isLoading || !isLoading2){
+    } else if (!isLoading || !isLoading2 || !isLoading3){
         ModalBottomSheetLayout(
             sheetState = modalSheetState,
             sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
@@ -229,7 +264,15 @@ fun MainScreenPage(
                             Toast.makeText(context, "Please Check Your Internet Connection And Try Again", Toast.LENGTH_SHORT).show()
                         }
                     }
-                )
+                ) {
+                    if (isNetworkAvailable(context)) {
+                        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                        launcher3.launch(takePictureIntent)
+                    }
+                    else {
+                        Toast.makeText(context, "Please Check Your Internet Connection And Try Again", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         ) {
             MainScreenContent(
@@ -646,7 +689,8 @@ fun Tokens(modifier: Modifier, tokenManager: TokenManager, onTokenCountClick: ()
 fun BottomSheet(
     state: ModalBottomSheetState,
     onPdfOptionClicked: () -> Unit,
-    onImageOptionClicked: () -> Unit
+    onImageOptionClicked: () -> Unit,
+    onCameraOptionClicked: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     Column(
@@ -679,6 +723,15 @@ fun BottomSheet(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.camera),
+                contentDescription = "",
+                modifier = Modifier
+                    .clickable {
+                        onCameraOptionClicked()
+                        scope.launch { state.hide() }
+                    }
+            )
             Image(
                 painter = painterResource(id = R.drawable.photo),
                 contentDescription = "",
