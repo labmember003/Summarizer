@@ -85,7 +85,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
 import java.io.IOException
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(
     onTokenCountClick: () -> Unit,
@@ -120,12 +119,17 @@ fun MainScreenPage(
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     }
     val language = sharedPreferences.getString(LANGUAGE, "English")
-
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             val text = extractTextFromPdf(uri, context)
             Log.i("hapyhapyhapy", "text")
-            Log.i("hapyhapyhapy", text)
+            Log.i("hapyhapyhapyhapyhapyhapyhapyhapyhapy", text)
+            println("hapyhapyhapyhapyhapyhapyhapyhapyhapy$text cat")
+            Log.i("hapyhapyhapyhapyhapyhapyhapyhapyhapy", text.length.toString())
+            if (text.length < 3) {
+                Log.i("hapyhapyhapyhapyhapyhapyhapyhapyhapy2", text)
+                println("hapyhapyhapyhapyhapyhapyhapyhapyhapy$text cat")
+            }
 //            val summarizedText = getResponseFromApi(text)
 //            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
             isLoading = true
@@ -146,7 +150,9 @@ fun MainScreenPage(
                     handleNavigtionFromMainScreenToSummarizedPage(error)
                     // Handle the error here if needed
                 },
-                language
+                language,
+                onTokenCountClick,
+                context
             )
         }
     }
@@ -177,7 +183,9 @@ fun MainScreenPage(
                         handleNavigtionFromMainScreenToSummarizedPage(error)
                         // Handle the error here if needed
                     },
-                    language = language
+                    language = language,
+                    onTokenCountClick = onTokenCountClick,
+                    context = context
                 )
             }
 //            val summarizedText = getResponseFromApi(text)
@@ -325,21 +333,19 @@ fun NavDrawerContent(contentName: String, imageID: Int, onClick: () -> Unit) {
     }
 }
 
-
-
-// ...
-
 fun getResponseFromApi(
     prompt: String,
     onSuccess: (String) -> Unit,
     onError: (String) -> Unit,
-    language: String?
+    language: String?,
+    onTokenCountClick: () -> Unit,
+    context: Context
 ) {
     val requestBody = RequestBody.create(
         "application/json".toMediaType(),
         Gson().toJson(
             ChatRequest(
-                250,
+                1000,
                 "text-davinci-003",
                 prompt = "Summarise this text in $language: \n$prompt",
                 0.7
@@ -348,25 +354,44 @@ fun getResponseFromApi(
     )
     val contentType = "application/json"
     val authorization = "Bearer ${Utils.API_KEY}"
-
-    CoroutineScope(Dispatchers.IO).launch {
-        try {
-            val response = ApiUtilities.getApiInterface().getChat(
-                contentType, authorization, requestBody
-            )
-            val textResponse = response.choices.first().text
-
-            withContext(Dispatchers.Main) {
-                onSuccess(textResponse)
+    val tokenManager = TokenManager()
+    tokenManager.getToken { tokenCount ->
+        val zero = 0
+        if (tokenCount!! > zero.toLong()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val response = ApiUtilities.getApiInterface().getChat(
+                        contentType, authorization, requestBody
+                    )
+                    val textResponse = response.choices.first().text
+                    withContext(Dispatchers.Main) {
+                        val tokenUsed = countWords(prompt) + countWords(textResponse)
+                        tokenManager.getToken { tokenCount ->
+                            if (tokenCount != null) {
+                                tokenManager.updateToken(tokenCount - tokenUsed.toLong())
+                            } else {
+                                Log.i(Utils.ERROR_TAG, "Account Not Signed")
+                            }
+                        }
+                        onSuccess(textResponse)
+                    }
+                } catch (e: Exception) {
+                    val errorResponse = e.message.toString()
+                    Log.i("hapyhapyhapy", errorResponse)
+                    withContext(Dispatchers.Main) {
+                        onError(errorResponse)
+                    }
+                }
             }
-        } catch (e: Exception) {
-            val errorResponse = e.message.toString()
-            Log.i("hapyhapyhapy", errorResponse)
-            withContext(Dispatchers.Main) {
-                onError(errorResponse)
-            }
+        } else {
+            inSufficientTokens(context) { onTokenCountClick() }
         }
     }
+}
+
+fun inSufficientTokens(context: Context, onTokenCountClick: () -> Unit) {
+    Toast.makeText(context, "Tokens running low! Get more to keep going. Cheers!", Toast.LENGTH_LONG).show()
+    onTokenCountClick()
 }
 
 
@@ -486,7 +511,9 @@ private fun MainScreenContent(
                                         isLoading = false
                                         Log.i("hapyhapyhapy", error)
                                     },
-                                    language = language
+                                    language = language,
+                                    onTokenCountClick = onTokenCountClick,
+                                    context = context
                                 )
                             } else {
                                 Toast.makeText(context, "Please Check Your Internet Connection And Try Again", Toast.LENGTH_SHORT).show()
@@ -734,4 +761,9 @@ private fun getTextFromImage(
             Log.e("kaaali billi", errorText)
             callback(errorText) // Pass the error to the callback function
         }
+}
+
+fun countWords(text: String): Int {
+    val words = text.trim().split("\\s+".toRegex())
+    return words.size
 }

@@ -41,7 +41,7 @@ class TokenManager {
                     val tokenCount = documentSnapshot.getLong("tokenCount")
                     callback(tokenCount)
                 } else {
-                    val initialTokenCount : Long = 80
+                    val initialTokenCount : Long = 200
                     putToken(initialTokenCount)
                     callback(initialTokenCount)
                 }
