@@ -85,7 +85,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.Response
 import java.io.IOException
 
 @Composable
@@ -384,6 +387,31 @@ fun getResponseFromApi(
     onTokenCountClick: () -> Unit,
     context: Context
 ) {
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val apiKey = fetchDataFromUrl("https://get-api-key-api-avishishtgupta-gmailcom.vercel.app/key")
+            withContext(Dispatchers.Main) {
+                gptResponse(language, prompt, apiKey, onSuccess, onError, context, onTokenCountClick)
+                Log.i("API_KEY", apiKey)
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+}
+
+private fun gptResponse(
+    language: String?,
+    prompt: String,
+    API_KEY: String,
+    onSuccess: (String) -> Unit,
+    onError: (String) -> Unit,
+    context: Context,
+    onTokenCountClick: () -> Unit
+) {
     val requestBody = RequestBody.create(
         "application/json".toMediaType(),
         Gson().toJson(
@@ -395,8 +423,11 @@ fun getResponseFromApi(
             )
         )
     )
+    Log.i("qwsdrfghjiklp", API_KEY)
     val contentType = "application/json"
-    val authorization = "Bearer ${Utils.API_KEY}"
+    val authorization = "Bearer ${API_KEY}"
+
+    // Coroutine scope for making the HTTP request
     val tokenManager = TokenManager()
     tokenManager.getToken { tokenCount ->
         val zero = 0
@@ -437,6 +468,15 @@ fun inSufficientTokens(context: Context, onTokenCountClick: () -> Unit) {
     onTokenCountClick()
 }
 
+suspend fun fetchDataFromUrl(url: String): String {
+    val client = OkHttpClient()
+    val request = Request.Builder()
+        .url(url)
+        .build()
+
+    val response: Response = client.newCall(request).execute()
+    return response.body?.string() ?: "No response"
+}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
