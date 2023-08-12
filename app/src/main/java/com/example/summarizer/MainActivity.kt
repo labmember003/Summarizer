@@ -79,6 +79,7 @@ import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 import android.util.Base64;
 import androidx.navigation.NavHostController
+import com.example.summarizer.walkthrough.WalkThroughScreen
 
 class MainActivity : ComponentActivity() {
     private val googleAuthUiClient by lazy {

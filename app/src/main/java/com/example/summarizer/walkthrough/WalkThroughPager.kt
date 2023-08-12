@@ -1,4 +1,4 @@
-package com.example.summarizer
+package com.example.summarizer.walkthrough
 
 data class WalkThroughPager(
     val image: Int,

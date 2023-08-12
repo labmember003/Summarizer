@@ -1,4 +1,4 @@
-package com.example.summarizer
+package com.example.summarizer.walkthrough
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -28,7 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.summarizer.DataManager.currentPage
+import com.example.summarizer.LottieAnimation
 import com.falcon.summarizer.R
 import com.google.accompanist.pager.HorizontalPagerIndicator
 
