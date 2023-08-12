@@ -8,6 +8,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -77,7 +79,10 @@ fun SettingsScreen(languages: List<String>, onBackCLick: () -> Boolean) {
         val openOssLicensesMenuActivity = {
             startActivity(context, Intent(context, OssLicensesMenuActivity::class.java), null)
         }
-        Column {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+        ) {
             PreferenceCategory("General")
             RegularPreference("Contact Us", "", {sendMail("Regarding App ")})
             LanguagePicker(languages = languages)
