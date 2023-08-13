@@ -127,39 +127,35 @@ fun MainScreenPage(
     val language = sharedPreferences.getString(LANGUAGE, "English")
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
-            val text = extractTextFromPdf(uri, context)
-            Log.i("hapyhapyhapy", "text")
-            Log.i("hapyhapyhapyhapyhapyhapyhapyhapyhapy", text)
-            println("hapyhapyhapyhapyhapyhapyhapyhapyhapy$text cat")
-            Log.i("hapyhapyhapyhapyhapyhapyhapyhapyhapy", text.length.toString())
-            if (text.length < 3) {
-                Log.i("hapyhapyhapyhapyhapyhapyhapyhapyhapy2", text)
-                println("hapyhapyhapyhapyhapyhapyhapyhapyhapy$text cat")
-            }
-//            val summarizedText = getResponseFromApi(text)
-//            handleNavigtionFromMainScreenToSummarizedPage(summarizedText) //  Navigate to summarized page with summarizedText
-            isLoading = true
-
-            getResponseFromApi(
-                prompt = text,
-                onSuccess = { response ->
-                    Log.i("hapyhapyhapy - 1", response)
-                    isLoading = false
+            var text = extractTextFromPdf(uri, context)
+            println("stats here")
+            println(text)
+            if (containsOnlySpaces(text)) {
+                Toast.makeText(context, "Sorry, The PDF You Provided Cannot Be red", Toast.LENGTH_SHORT).show()
+                isLoading = false
+            } else {
+                isLoading = true
+                getResponseFromApi(
+                    prompt = text,
+                    onSuccess = { response ->
+                        Log.i("hapyhapyhapy - 1", response)
+                        isLoading = false
 //                    responseText = response
-                    handleNavigtionFromMainScreenToSummarizedPage(response)
-                    // Navigate to the summarized page here if needed
-                    // You can use the responseText variable to pass the result
-                },
-                onError = { error ->
-                    isLoading = false
-                    Log.i("hapyhapyhapy - 2", error)
-                    handleNavigtionFromMainScreenToSummarizedPage(error)
-                    // Handle the error here if needed
-                },
-                language,
-                onTokenCountClick,
-                context
-            )
+                        handleNavigtionFromMainScreenToSummarizedPage(response)
+                        // Navigate to the summarized page here if needed
+                        // You can use the responseText variable to pass the result
+                    },
+                    onError = { error ->
+                        isLoading = false
+                        Log.i("hapyhapyhapy - 2", error)
+                        handleNavigtionFromMainScreenToSummarizedPage(error)
+                        // Handle the error here if needed
+                    },
+                    language,
+                    onTokenCountClick,
+                    context
+                )
+            }
         }
     }
     var isLoading2 by remember { mutableStateOf(false) }
@@ -859,4 +855,10 @@ private fun getTextFromImage(
 fun countWords(text: String): Int {
     val words = text.trim().split("\\s+".toRegex())
     return words.size
+}
+
+fun containsOnlySpaces(input: String): Boolean {
+    return input.all {
+        it == ' '|| it == '\n'
+    }
 }

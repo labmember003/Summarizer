@@ -8,6 +8,7 @@ import android.content.Context.CLIPBOARD_SERVICE
 import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -186,13 +187,8 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState, summarizedText
                 val context = LocalContext.current
                 val clipboardManager = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                 Column(
-//                TODO("UPAR KAISE LAU ISSE?)
                     verticalArrangement = Arrangement.SpaceEvenly,
                     horizontalAlignment = Alignment.Start,
-//                    modifier = Modifier
-//                        .clickable {
-//                            clipboardManager.setPrimaryClip(ClipData.newPlainText("Copied Text", content.value))
-//                        }
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ContentCopy,
@@ -210,7 +206,8 @@ fun SummarizedPageContent(modalSheetState: ModalBottomSheetState, summarizedText
                         tint = Color.Gray,
                         modifier = Modifier
                             .clickable {
-                                downloadTextPdf(content.value, context)
+                                Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
+//                                downloadTextPdf(content.value, context)
                             }
                     )
                     Spacer(modifier = Modifier.size(20.dp))

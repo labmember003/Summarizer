@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.falcon.summarizer.R
 
+@Preview
 @Composable
 fun LoginScreen() {
     Box(
@@ -130,8 +131,6 @@ fun SignUp() {
         EditText("Email")
         EditText("Password", PasswordVisualTransformation())
         LoginButton("SignUp", PAGES.MAINPAGE)
-        // TODO PASS ROLE
-        // yaha ek aisa ROLL class ka object pass krna jo sirf DropDown ne set kiya ho
     }
 }
 
@@ -143,7 +142,6 @@ fun LoginImage() {
         modifier = Modifier
             .padding(0.dp, 30.dp, 0.dp, 0.dp)
             .scale(1.5f)
-//            .size(150.dp)
     )
 }
 
