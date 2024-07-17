@@ -43,7 +43,11 @@ val walkThroughPagerContent = listOf(
 fun WalkThroughScreen(
     onNextCLick: () -> Unit
 ) {
-    val pageState = rememberPagerState()
+    val pageState = rememberPagerState(
+        pageCount = {
+            walkThroughPagerContent.size
+        }
+    )
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,7 +82,6 @@ fun WalkThroughScreen(
         }
 
         HorizontalPager(
-            pageCount = walkThroughPagerContent.size,
             state = pageState,
             modifier = Modifier
                 .fillMaxWidth()

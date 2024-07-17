@@ -2,6 +2,7 @@
 
 package com.example.summarizer
 
+import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
@@ -199,7 +200,7 @@ fun MainScreenPage(
     var isLoading3 by remember { mutableStateOf(false) }
     val launcher3 = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         isLoading3 = true
-        if (result.resultCode == ComponentActivity.RESULT_OK) {
+        if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
             val imageBitmap = data?.extras?.get("data")?.let { it as android.graphics.Bitmap }
             imageBitmapState.value = imageBitmap
